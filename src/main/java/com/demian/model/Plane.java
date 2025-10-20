@@ -14,7 +14,6 @@ public class Plane {
     RuleEnforcer ruleEnforcer;
 
     public Plane() {
-        cells = new ArrayList<>();
         ruleEnforcer = new RuleEnforcer(sizeX, sizeY);
     }
 
@@ -26,10 +25,16 @@ public class Plane {
 
     public void initialize(int initialSizeX, int initialSizeY) {
         setSize(initialSizeX, initialSizeY);
-        for (int i=0; i<initialSizeX; i++) {
-            for (int j=0; j<initialSizeY; j++) {
-                cells.add(new Cell());
+        cells = new ArrayList<>(initialSizeX * initialSizeY);
+
+        for (int y = 0; y < initialSizeY; y++) {
+            for (int x = 0; x < initialSizeX; x++) {
+                cells.add(new Cell(x, y));
             }
+        }
+
+        for (Cell c : cells) {
+            c.initializeNeighborhood(this);
         }
     }
 
@@ -60,19 +65,24 @@ public class Plane {
     }
 
     public void simulateGeneration() {
-        List<Cell> newCells = new ArrayList<>();
-        for (int i=0; i<sizeX*sizeY; i++) {
-            int state = ruleEnforcer.getState(cells, i);
 
-
-            newCells.add(new Cell(state));
+        for (Cell c : cells) {
+            c.computeNextState(ruleEnforcer);
         }
+
+        for (Cell c : cells) {
+            c.applyNextState();
+        }
+
         ruleEnforcer.changeAlternator();
-        cells = newCells;
     }
 
     private boolean checkBounds(int index) {
         return (index >= 0 && index < sizeX * sizeY);
+    }
+
+    public boolean checkBounds(int x, int y) {
+        return (x >= 0 && x < sizeX && y >= 0 && y < sizeY);
     }
 
 
@@ -84,6 +94,9 @@ public class Plane {
         return sizeY;
     }
 
+    public Cell getCell(int x, int y) {
+        return cells.get(y * sizeX + x);
+    }
 
     public void setCurrentRuleSet(RuleSet ruleSet) {
         ruleEnforcer.setRuleSet(ruleSet);

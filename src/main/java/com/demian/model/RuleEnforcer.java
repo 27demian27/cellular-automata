@@ -19,56 +19,25 @@ public class RuleEnforcer {
         ruleSet = RuleSet.GAME_OF_LIFE;
     }
 
-    public int getState(List<Cell> cells, int i) {
+    public int getNextState(Cell cell) {
         int state = -1;
+        MooreNeighborhood neighborhood = cell.getNeighborhood();
         switch (ruleSet) {
             case GAME_OF_LIFE -> {
-                state =
-                        gameOfLife(
-                                checkBounds(i - sizeX - 1) ? cells.get(i - sizeX - 1).state : 0, // TL
-                                checkBounds(i - sizeX) ? cells.get(i - sizeX).state : 0, // TM
-                                checkBounds(i - sizeX + 1) ? cells.get(i - sizeX + 1).state : 0, // TR
-                                checkBounds(i - 1) ? cells.get(i - 1).state : 0, // ML
-                                checkBounds(i) ? cells.get(i).state : 0, // MM
-                                checkBounds(i + 1) ? cells.get(i + 1).state : 0, // MR
-                                checkBounds(i + sizeX - 1) ? cells.get(i + sizeX - 1).state : 0, // BL
-                                checkBounds(i + sizeX) ? cells.get(i + sizeX).state : 0, // BM
-                                checkBounds(i + sizeX + 1) ? cells.get(i + sizeX + 1).state : 0 // BR
-                        );
+                state = gameOfLife(neighborhood);
             }
             case SIMPLE_GROWTH -> {
-                state =
-                        simpleGrowth(
-                                checkBounds(i - 1) ? cells.get(i - 1).state : 0, // LEFT
-                                checkBounds(i - sizeX) ? cells.get(i - sizeX).state : 0, // TOP
-                                checkBounds(i) ? cells.get(i).state : 0, // MIDDLE
-                                checkBounds(i + 1) ? cells.get(i + 1).state : 0, // RIGHT
-                                checkBounds(i + sizeX) ? cells.get(i + sizeX).state : 0 // BOTTOM
-                        );
+                state = simpleGrowth(neighborhood);
+            }
+            case DIAG_GROWTH -> {
+                state = diagGrowth(neighborhood);
             }
             case ALTERNATING -> {
                 if (alternator == 0) {
                     state =
-                            simpleGrowth(
-                                checkBounds(i - 1) ? cells.get(i - 1).state : 0, // LEFT
-                                checkBounds(i - sizeX) ? cells.get(i - sizeX).state : 0, // TOP
-                                checkBounds(i) ? cells.get(i).state : 0, // MIDDLE
-                                checkBounds(i + 1) ? cells.get(i + 1).state : 0, // RIGHT
-                                checkBounds(i + sizeX) ? cells.get(i + sizeX).state : 0 // BOTTOM
-                    );
+                            simpleGrowth(neighborhood);
                 } else {
-                    state =
-                            gameOfLife(
-                                    checkBounds(i - sizeX - 1) ? cells.get(i - sizeX - 1).state : 0, // TL
-                                    checkBounds(i - sizeX) ? cells.get(i - sizeX).state : 0, // TM
-                                    checkBounds(i - sizeX + 1) ? cells.get(i - sizeX + 1).state : 0, // TR
-                                    checkBounds(i - 1) ? cells.get(i - 1).state : 0, // ML
-                                    checkBounds(i) ? cells.get(i).state : 0, // MM
-                                    checkBounds(i + 1) ? cells.get(i + 1).state : 0, // MR
-                                    checkBounds(i + sizeX - 1) ? cells.get(i + sizeX - 1).state : 0, // BL
-                                    checkBounds(i + sizeX) ? cells.get(i + sizeX).state : 0, // BM
-                                    checkBounds(i + sizeX + 1) ? cells.get(i + sizeX + 1).state : 0 // BR
-                            );
+                    state = gameOfLife(neighborhood);
                 }
             }
             default -> {
@@ -79,10 +48,20 @@ public class RuleEnforcer {
         return state;
     }
 
-    private int gameOfLife(int TL, int TM, int TR, int ML, int MM, int MR, int BL, int BM, int BR) {
+    private int gameOfLife(MooreNeighborhood neighborhood) {
         int neighborsCount = 0;
 
-        neighborsCount += TL += TM += TR += ML += MR += BL += BM += BR;
+        neighborsCount +=
+        neighborhood.TLstate() +
+        neighborhood.TMstate() +
+        neighborhood.TRstate() +
+        neighborhood.MLstate() +
+        neighborhood.MRstate() +
+        neighborhood.BLstate() +
+        neighborhood.BMstate() +
+        neighborhood.BRstate();
+
+        int MM = neighborhood.MMstate();
 
         if (MM == 0 && neighborsCount == 3)
             return 1;
@@ -96,17 +75,32 @@ public class RuleEnforcer {
         return 0;
     }
 
-    private int simpleGrowth(int leftState, int topState, int currentState, int rightState, int bottomState) {
-        if (leftState > 0)
+    private int simpleGrowth(MooreNeighborhood neighborhood) {
+        if (neighborhood.MLstate() > 0)
             return 1;
-        if (rightState > 0)
+        if (neighborhood.MRstate() > 0)
             return 1;
-        if (topState > 0)
+        if (neighborhood.TMstate()> 0)
             return 1;
-        if (bottomState > 0)
+        if (neighborhood.BMstate() > 0)
             return 1;
 
-        return currentState;
+        return neighborhood.MMstate();
+    }
+
+    private int diagGrowth(MooreNeighborhood neighborhood) {
+
+
+        if (neighborhood.TLstate() > 0 && neighborhood.TRstate() > 0 &&
+                neighborhood.BLstate() > 0 && neighborhood.BRstate() > 0)
+            return 0;
+
+        if (neighborhood.MMstate() > 0)
+            return 1;
+
+
+        return (neighborhood.TLstate() > 0 || neighborhood.TRstate() > 0 ||
+                neighborhood.BLstate() > 0 || neighborhood.BRstate() > 0) ? 1 : 0;
     }
 
     private boolean checkBounds(int index) {
