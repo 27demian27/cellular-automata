@@ -64,7 +64,7 @@ public class Grid extends JPanel {
             else
                 scale /= Math.pow(factor, notches);
 
-            scale = Math.max(0.1, Math.min(10.0, scale));
+            scale = Math.max(0.05, Math.min(10.0, scale));
 
             Point p = e.getPoint();
             translateX = (int) (p.x - (p.x - translateX) * (scale / oldScale));
@@ -116,17 +116,25 @@ public class Grid extends JPanel {
         g2.scale(scale, scale);
 
         int cellSize = 20;
+        double minScaleForBorderDraw = 0.10;
 
-        for (int x = 0; x < plane.getSizeX(); x++) {
-            for (int y = 0; y < plane.getSizeY(); y++) {
+        Rectangle clip = g2.getClipBounds();
+        int startX = Math.max(0, clip.x / cellSize);
+        int endX   = Math.min(plane.getSizeX(), (clip.x + clip.width) / cellSize + 1);
+        int startY = Math.max(0, clip.y / cellSize);
+        int endY   = Math.min(plane.getSizeY(), (clip.y + clip.height) / cellSize + 1);
+
+        for (int x = startX; x < endX; x++) {
+            for (int y = startY; y < endY; y++) {
                 int state = plane.getState(x, y).orElse(0);
                 g2.setColor(state == 1 ? Color.BLACK : Color.WHITE);
                 g2.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-                g2.setColor(Color.BLACK);
-                g2.drawRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                if (scale > minScaleForBorderDraw) {
+                    g2.setColor(Color.BLACK);
+                    g2.drawRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
             }
         }
-
         g2.dispose();
     }
 }

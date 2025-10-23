@@ -12,7 +12,7 @@ public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             Plane model = new Plane();
-            model.initialize(200, 200);
+            model.initialize(400, 400);
 
             GUIView view = new GUIView(model);
             GUIController controller = new GUIController(model, view);

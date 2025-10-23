@@ -39,6 +39,10 @@ public class GUIController {
             model.setCurrentRuleSet(ruleSet);
             view.repaintGrid();
         });
+
+        menu.setOnAlternatingRulesetAdded(model::addAlternatingRuleSet);
+
+        menu.setOnAlternatingRulesetRemoved(model::removeAlternatingRuleSet);
     }
 
     public void nextGeneration() {

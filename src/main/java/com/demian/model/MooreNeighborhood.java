@@ -1,7 +1,5 @@
 package com.demian.model;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class MooreNeighborhood {
 

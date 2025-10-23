@@ -66,6 +66,8 @@ public class Plane {
 
     public void simulateGeneration() {
 
+        ruleEnforcer.changeAlternation();
+
         for (Cell c : cells) {
             c.computeNextState(ruleEnforcer);
         }
@@ -74,7 +76,6 @@ public class Plane {
             c.applyNextState();
         }
 
-        ruleEnforcer.changeAlternator();
     }
 
     private boolean checkBounds(int index) {
@@ -100,5 +101,13 @@ public class Plane {
 
     public void setCurrentRuleSet(RuleSet ruleSet) {
         ruleEnforcer.setRuleSet(ruleSet);
+    }
+
+    public void addAlternatingRuleSet(RuleSet ruleSet) {
+        ruleEnforcer.addAlternatingRuleSet(ruleSet);
+    }
+
+    public void removeAlternatingRuleSet(RuleSet ruleSet) {
+        ruleEnforcer.removeAlternatingRuleSet(ruleSet);
     }
 }

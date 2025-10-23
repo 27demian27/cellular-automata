@@ -1,6 +1,6 @@
 package com.demian.model;
 
-import java.util.List;
+import java.util.*;
 
 public class RuleEnforcer {
 
@@ -8,21 +8,34 @@ public class RuleEnforcer {
     int sizeY;
     private RuleSet ruleSet;
 
-    private int alternator;
+    private Set<RuleSet> alternatingRules;
+    private Iterator<RuleSet> iterator;
+
+    private RuleSet alternationRuleSet;
 
     public RuleEnforcer(int sizeX, int sizeY) {
         this.sizeX = sizeX;
         this.sizeY = sizeY;
 
-        alternator = 0;
 
+        alternationRuleSet = RuleSet.GAME_OF_LIFE;
         ruleSet = RuleSet.GAME_OF_LIFE;
+        alternatingRules = new TreeSet<>();
+        iterator = alternatingRules.iterator();
     }
 
     public int getNextState(Cell cell) {
         int state = -1;
         MooreNeighborhood neighborhood = cell.getNeighborhood();
-        switch (ruleSet) {
+
+        RuleSet currentRuleSet = ruleSet;
+
+
+        if (ruleSet == RuleSet.ALTERNATING) {
+            currentRuleSet = alternationRuleSet;
+        }
+
+        switch (currentRuleSet) {
             case GAME_OF_LIFE -> {
                 state = gameOfLife(neighborhood);
             }
@@ -31,14 +44,6 @@ public class RuleEnforcer {
             }
             case DIAG_GROWTH -> {
                 state = diagGrowth(neighborhood);
-            }
-            case ALTERNATING -> {
-                if (alternator == 0) {
-                    state =
-                            simpleGrowth(neighborhood);
-                } else {
-                    state = gameOfLife(neighborhood);
-                }
             }
             default -> {
                 System.err.println("ERROR: NO RULESET SELECTED");
@@ -116,7 +121,23 @@ public class RuleEnforcer {
         this.sizeY = sizeY;
     }
 
-    public void changeAlternator() {
-        alternator = (alternator + 1) % 2;
+    public void changeAlternation() {
+        if (iterator == null || alternatingRules.isEmpty())
+            return;
+
+        if (!iterator.hasNext()) {
+            iterator = alternatingRules.iterator();
+        }
+        alternationRuleSet = iterator.next();
+    }
+
+    public void addAlternatingRuleSet(RuleSet ruleSet) {
+        alternatingRules.add(ruleSet);
+        iterator = alternatingRules.iterator();
+    }
+
+    public void removeAlternatingRuleSet(RuleSet ruleSet) {
+        alternatingRules.remove(ruleSet);
+        iterator = alternatingRules.iterator();
     }
 }
