@@ -45,6 +45,9 @@ public class RuleEnforcer {
             case DIAG_GROWTH -> {
                 state = diagGrowth(neighborhood);
             }
+            case RULE30 -> {
+                state = rule30(neighborhood);
+            }
             default -> {
                 System.err.println("ERROR: NO RULESET SELECTED");
                 System.exit(1);
@@ -106,6 +109,30 @@ public class RuleEnforcer {
 
         return (neighborhood.TLstate() > 0 || neighborhood.TRstate() > 0 ||
                 neighborhood.BLstate() > 0 || neighborhood.BRstate() > 0) ? 1 : 0;
+    }
+
+    private int rule30(MooreNeighborhood neighborhood) {
+        int TL = neighborhood.TLstate();
+        int TM = neighborhood.TMstate();
+        int TR = neighborhood.TRstate();
+
+
+        if (TL == 1 && TM == 1 && TR == 1)
+            return 0;
+        if (TL == 1 && TM == 1 && TR == 0)
+            return 0;
+        if (TL == 1 && TM == 0 && TR == 1)
+            return 0;
+        if (TL == 1 && TM == 0 && TR == 0)
+            return 1;
+        if (TL == 0 && TM == 1 && TR == 1)
+            return 1;
+        if (TL == 0 && TM == 1 && TR == 0)
+            return 1;
+        if (TL == 0 && TM == 0 && TR == 1)
+            return 1;
+
+        return neighborhood.MMstate();
     }
 
     private boolean checkBounds(int index) {

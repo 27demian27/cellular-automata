@@ -14,7 +14,11 @@ import java.util.function.Consumer;
 public class Menu extends JMenuBar {
 
     private Runnable onClearRequested;
+
+
     private Runnable onNextGenerationRequested;
+
+    private Runnable onRandomizeRequested;
 
 
     private Consumer<RuleSet> onAlternatingRulesetAdded;
@@ -105,12 +109,20 @@ public class Menu extends JMenuBar {
     private void addEditMenu() {
         JMenu editMenu = new JMenu("EDIT");
 
+        JMenuItem randomizeItem = new JMenuItem("Randomize Grid");
+        randomizeItem.addActionListener(e -> {
+            if (onRandomizeRequested != null)
+                onRandomizeRequested.run();
+        });
+        editMenu.add(randomizeItem);
+
         JMenuItem clearItem = new JMenuItem("Clear Grid");
         clearItem.addActionListener(e -> {
             if (onClearRequested != null)
                 onClearRequested.run();
         });
         editMenu.add(clearItem);
+
 
         add(editMenu);
     }
@@ -135,4 +147,7 @@ public class Menu extends JMenuBar {
         this.onAlternatingRulesetRemoved = onAlternatingRulesetRemoved;
     }
 
+    public void setOnRandomizeRequested(Runnable onRandomizeRequested) {
+        this.onRandomizeRequested = onRandomizeRequested;
+    }
 }

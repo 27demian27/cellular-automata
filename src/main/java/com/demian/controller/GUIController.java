@@ -33,6 +33,11 @@ public class GUIController {
             view.repaintGrid();
         });
 
+        menu.setOnRandomizeRequested(() -> {
+            model.randomizeCells();
+            view.repaintGrid();
+        });
+
         menu.setOnNextGenerationRequested(this::nextGeneration);
 
         menu.setOnRuleSetSelected(ruleSet -> {

@@ -3,6 +3,8 @@ package com.demian.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.stream.IntStream;
 
 public class Plane {
 
@@ -13,8 +15,11 @@ public class Plane {
 
     RuleEnforcer ruleEnforcer;
 
+    Random randomizer;
+
     public Plane() {
         ruleEnforcer = new RuleEnforcer(sizeX, sizeY);
+        randomizer = new Random();
     }
 
     private void setSize(int sizeX, int sizeY) {
@@ -61,6 +66,13 @@ public class Plane {
     public void killCells() {
         for (Cell cell : cells) {
             cell.state = 0;
+        }
+    }
+
+    public void randomizeCells() {
+        for (Cell cell : cells) {
+            boolean boolState = randomizer.nextBoolean();
+            cell.state = boolState ? 1 : 0;
         }
     }
 

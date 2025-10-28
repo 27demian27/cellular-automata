@@ -14,14 +14,14 @@ public class MooreNeighborhood {
         int x = centralCell.getX();
         int y = centralCell.getY();
 
-        tl = plane.checkBounds(x-1, y+1) ? plane.getCell(x-1, y+1) : null;
-        tm = plane.checkBounds(x, y+1) ? plane.getCell(x, y+1) : null;
-        tr = plane.checkBounds(x+1, y+1) ? plane.getCell(x+1, y+1) : null;
+        tl = plane.checkBounds(x-1, y-1) ? plane.getCell(x-1, y-1) : null;
+        tm = plane.checkBounds(x, y-1) ? plane.getCell(x, y-1) : null;
+        tr = plane.checkBounds(x+1, y-1) ? plane.getCell(x+1, y-1) : null;
         ml = plane.checkBounds(x-1, y) ? plane.getCell(x-1, y) : null;
         mr  = plane.checkBounds(x+1, y) ? plane.getCell(x+1, y) : null;
-        bl = plane.checkBounds(x-1, y-1) ? plane.getCell(x-1, y-1) : null;
-        bm = plane.checkBounds(x, y-1) ? plane.getCell(x, y-1) : null;
-        br = plane.checkBounds(x+1, y-1) ? plane.getCell(x+1, y-1) : null;
+        bl = plane.checkBounds(x-1, y+1) ? plane.getCell(x-1, y+1) : null;
+        bm = plane.checkBounds(x, y+1) ? plane.getCell(x, y+1) : null;
+        br = plane.checkBounds(x+1, y+1) ? plane.getCell(x+1, y+1) : null;
     }
 
 
