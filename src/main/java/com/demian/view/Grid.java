@@ -5,28 +5,46 @@ import com.demian.model.Plane;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class Grid extends JPanel {
 
-    private Plane plane;
-    private double scale = 1.0;
-    private int translateX = 0;
-    private int translateY = 0;
-    private Point lastDragPoint = null;
+    private final Plane plane;
+    private double scale;
+    private int translateX;
+    private int translateY;
+    private Point lastDragPoint;
 
     private BiConsumer<Integer, Integer> onCellClicked;
 
     private Runnable onNextGenerationRequested;
 
+
+    private DebugDrawer debugDrawer;
+
     public Grid(Plane plane) {
         this.plane = plane;
+        this.scale = 1.0;
+        this.translateX = 0;
+        this.translateY = 0;
+        this.lastDragPoint = null;
+        this.debugDrawer = new DebugDrawer();
 
         setBackground(Color.DARK_GRAY);
+        configureControls();
+    }
 
+    private void configureControls() {
         // Panning
         MouseAdapter mouseAdapter = new MouseAdapter() {
+            private final Cursor defaultCursor =  new Cursor(Cursor.DEFAULT_CURSOR);
+            private final Cursor panningCursor =  new Cursor(Cursor.MOVE_CURSOR);
+
+
             @Override
             public void mousePressed(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) lastDragPoint = e.getPoint();
@@ -36,11 +54,13 @@ public class Grid extends JPanel {
             @Override
             public void mouseReleased(MouseEvent e) {
                 lastDragPoint = null;
+                setCursor(defaultCursor);
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e) && lastDragPoint != null) {
+                    setCursor(panningCursor);
                     int dx = e.getX() - lastDragPoint.x;
                     int dy = e.getY() - lastDragPoint.y;
                     translateX += dx;
@@ -116,7 +136,7 @@ public class Grid extends JPanel {
         g2.scale(scale, scale);
 
         int cellSize = 20;
-        double minScaleForBorderDraw = 0.10;
+        double minScaleForBorderDraw = 0.2;
 
         Rectangle clip = g2.getClipBounds();
         int startX = Math.max(0, clip.x / cellSize);
@@ -124,11 +144,16 @@ public class Grid extends JPanel {
         int startY = Math.max(0, clip.y / cellSize);
         int endY   = Math.min(plane.getSizeY(), (clip.y + clip.height) / cellSize + 1);
 
+        g2.setColor(Color.WHITE);
+        g2.fillRect(0, 0, plane.getSizeX() * cellSize, plane.getSizeY() * cellSize);
+
         for (int x = startX; x < endX; x++) {
             for (int y = startY; y < endY; y++) {
                 int state = plane.getState(x, y).orElse(0);
-                g2.setColor(state == 1 ? Color.BLACK : Color.WHITE);
-                g2.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                if (state == 1) {
+                    g2.setColor(Color.BLACK);
+                    g2.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
                 if (scale > minScaleForBorderDraw) {
                     g2.setColor(Color.BLACK);
                     g2.drawRect(x * cellSize, y * cellSize, cellSize, cellSize);
