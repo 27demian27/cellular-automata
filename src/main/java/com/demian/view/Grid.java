@@ -1,15 +1,12 @@
 package com.demian.view;
 
 import com.demian.model.Plane;
+import com.demian.view.painting.PaintMode;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class Grid extends JPanel {
 
@@ -18,8 +15,15 @@ public class Grid extends JPanel {
     private int translateX;
     private int translateY;
     private Point lastDragPoint;
+    private Point lastGridPaintPoint;
 
-    private BiConsumer<Integer, Integer> onCellClicked;
+    public void setPaintMode(PaintMode paintMode) {
+        this.paintMode = paintMode;
+    }
+
+    private PaintMode paintMode;
+
+    private BiConsumer<Integer, Integer> onCellToggled;
 
     private Runnable onNextGenerationRequested;
 
@@ -31,7 +35,9 @@ public class Grid extends JPanel {
         this.scale = 1.0;
         this.translateX = 0;
         this.translateY = 0;
-        this.lastDragPoint = null;
+        this.lastDragPoint = new Point(-1, -1);
+        this.lastGridPaintPoint = new Point(-1, -1);
+        this.paintMode = PaintMode.NORMAL;
         this.debugDrawer = new DebugDrawer();
 
         setBackground(Color.DARK_GRAY);
@@ -43,12 +49,14 @@ public class Grid extends JPanel {
         MouseAdapter mouseAdapter = new MouseAdapter() {
             private final Cursor defaultCursor =  new Cursor(Cursor.DEFAULT_CURSOR);
             private final Cursor panningCursor =  new Cursor(Cursor.MOVE_CURSOR);
+            private final Cursor brushCursor   =  new Cursor(Cursor.CROSSHAIR_CURSOR);
 
 
             @Override
             public void mousePressed(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e)) lastDragPoint = e.getPoint();
-                else if (SwingUtilities.isLeftMouseButton(e)) handleCellClick(e);
+                lastDragPoint = e.getPoint();
+                if (SwingUtilities.isLeftMouseButton(e))
+                    handleCellClick(e);
             }
 
             @Override
@@ -59,7 +67,9 @@ public class Grid extends JPanel {
 
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e) && lastDragPoint != null) {
+                if (lastDragPoint == null) return;
+
+                if (SwingUtilities.isRightMouseButton(e)) {
                     setCursor(panningCursor);
                     int dx = e.getX() - lastDragPoint.x;
                     int dy = e.getY() - lastDragPoint.y;
@@ -67,6 +77,14 @@ public class Grid extends JPanel {
                     translateY += dy;
                     lastDragPoint = e.getPoint();
                     repaint();
+                }
+
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    setCursor(brushCursor);
+                    if (lastDragPoint != e.getPoint()) {
+                        lastDragPoint = e.getPoint();
+                        handleCellPaintDrag(e);
+                    }
                 }
             }
         };
@@ -103,21 +121,42 @@ public class Grid extends JPanel {
         });
     }
 
-    private void handleCellClick(MouseEvent e) {
+    private Point toGridPoint(Point mousePoint) {
         int cellSize = 20;
 
         double invScale = 1.0 / scale;
-        int logicalX = (int) ((e.getX() - translateX) * invScale / cellSize);
-        int logicalY = (int) ((e.getY() - translateY) * invScale / cellSize);
+        int logicalX = (int) ((mousePoint.getX() - translateX) * invScale / cellSize);
+        int logicalY = (int) ((mousePoint.getY() - translateY) * invScale / cellSize);
 
-        if (logicalX >= 0 && logicalX < plane.getSizeX() && logicalY >= 0 && logicalY < plane.getSizeY()) {
-            if (onCellClicked != null)
-                onCellClicked.accept(logicalX, logicalY);
+        if (logicalX < 0 && logicalX >= plane.getSizeX() && logicalY < 0 && logicalY >= plane.getSizeY())
+            throw new RuntimeException("mousePoint outside of grid");
+
+        return new Point(logicalX, logicalY);
+    }
+
+    private void handleCellClick(MouseEvent e) {
+        Point gridPoint = toGridPoint(e.getPoint());
+
+        if (onCellToggled != null)
+            onCellToggled.accept(gridPoint.x, gridPoint.y);
+    }
+
+    private void handleCellPaintDrag(MouseEvent e) {
+        Point newGridPoint = toGridPoint(e.getPoint());
+        if (!lastGridPaintPoint.equals(newGridPoint)) {
+            lastGridPaintPoint = newGridPoint;
+            if (plane.getCell(newGridPoint.x, newGridPoint.y).state == 1 && paintMode == PaintMode.ERASE) {
+                handleCellClick(e);
+            }
+
+            if (plane.getCell(newGridPoint.x, newGridPoint.y).state != 1 && paintMode == PaintMode.NORMAL) {
+                handleCellClick(e);
+            }
         }
     }
 
-    public void setOnCellClicked(BiConsumer<Integer, Integer> listener) {
-        this.onCellClicked = listener;
+    public void setOnCellToggled(BiConsumer<Integer, Integer> listener) {
+        this.onCellToggled = listener;
     }
 
     public void setOnNextGenerationRequested(Runnable listener) {

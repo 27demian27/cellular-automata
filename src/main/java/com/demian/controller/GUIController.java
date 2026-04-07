@@ -18,7 +18,7 @@ public class GUIController {
     }
 
     private void setGridListeners() {
-        view.getGrid().setOnCellClicked((x, y) -> {
+        view.getGrid().setOnCellToggled((x, y) -> {
             int current = model.getState(x, y).orElse(0);
             model.setState(current == 0 ? 1 : 0, x, y);
             view.repaintGrid();

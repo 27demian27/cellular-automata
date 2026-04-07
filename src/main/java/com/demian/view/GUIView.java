@@ -18,7 +18,7 @@ public class GUIView {
         grid = new Grid(plane);
         frame.add(grid, BorderLayout.CENTER);
 
-        menuBar = new Menu();
+        menuBar = new Menu(grid);
         frame.setJMenuBar(menuBar);
 
         frame.setSize(800, 800);

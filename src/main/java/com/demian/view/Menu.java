@@ -3,6 +3,7 @@ package com.demian.view;
 import com.demian.controller.GUIController;
 import com.demian.model.Plane;
 import com.demian.model.RuleSet;
+import com.demian.view.painting.PaintMode;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -14,20 +15,23 @@ import java.util.function.Consumer;
 public class Menu extends JMenuBar {
 
     private Runnable onClearRequested;
-
-
     private Runnable onNextGenerationRequested;
-
     private Runnable onRandomizeRequested;
 
 
     private Consumer<RuleSet> onAlternatingRulesetAdded;
     private Consumer<RuleSet> onAlternatingRulesetRemoved;
     private Consumer<RuleSet> onRuleSetSelected;
+    private Consumer<PaintMode> onPaintModeChanged;
 
-    public Menu() {
+    private final Grid grid;
+
+    public Menu(Grid grid) {
+        this.grid = grid;
+
         addRuleSetMenu();
         addEditMenu();
+        addBrushMenu();
     }
 
     private void addRuleSetMenu() {
@@ -127,6 +131,26 @@ public class Menu extends JMenuBar {
         add(editMenu);
     }
 
+    private void addBrushMenu() {
+        JMenu brushMenu = new JMenu("SELECT BRUSH");
+
+        JMenuItem paintBrushItem = new JMenuItem("PAINTING");
+        paintBrushItem.addActionListener(e -> {
+            grid.setPaintMode(PaintMode.NORMAL);
+            brushMenu.setText("PAINTING");
+        });
+        brushMenu.add(paintBrushItem);
+
+        JMenuItem eraseBrushItem = new JMenuItem("ERASING");
+        eraseBrushItem.addActionListener(e -> {
+            grid.setPaintMode(PaintMode.ERASE);
+            brushMenu.setText("ERASING");
+        });
+        brushMenu.add(eraseBrushItem);
+
+        add(brushMenu);
+    }
+
     public void setOnClearRequested(Runnable onClearRequested) {
         this.onClearRequested = onClearRequested;
     }
@@ -150,4 +174,5 @@ public class Menu extends JMenuBar {
     public void setOnRandomizeRequested(Runnable onRandomizeRequested) {
         this.onRandomizeRequested = onRandomizeRequested;
     }
+
 }
