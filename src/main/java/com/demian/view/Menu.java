@@ -127,6 +127,9 @@ public class Menu extends JMenuBar {
         });
         editMenu.add(clearItem);
 
+        JMenuItem toggleGridLinesItem = new JMenuItem("Toggle Grid Lines");
+        toggleGridLinesItem.addActionListener(e -> grid.toggleGridLines());
+        editMenu.add(toggleGridLinesItem);
 
         add(editMenu);
     }

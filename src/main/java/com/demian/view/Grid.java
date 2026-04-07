@@ -16,12 +16,8 @@ public class Grid extends JPanel {
     private int translateY;
     private Point lastDragPoint;
     private Point lastGridPaintPoint;
-
-    public void setPaintMode(PaintMode paintMode) {
-        this.paintMode = paintMode;
-    }
-
     private PaintMode paintMode;
+    private boolean showGridLines;
 
     private BiConsumer<Integer, Integer> onCellToggled;
 
@@ -38,6 +34,7 @@ public class Grid extends JPanel {
         this.lastDragPoint = new Point(-1, -1);
         this.lastGridPaintPoint = new Point(-1, -1);
         this.paintMode = PaintMode.NORMAL;
+        this.showGridLines = true;
         this.debugDrawer = new DebugDrawer();
 
         setBackground(Color.DARK_GRAY);
@@ -193,12 +190,21 @@ public class Grid extends JPanel {
                     g2.setColor(Color.BLACK);
                     g2.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
                 }
-                if (scale > minScaleForBorderDraw) {
+                if (showGridLines && scale > minScaleForBorderDraw) {
                     g2.setColor(Color.BLACK);
                     g2.drawRect(x * cellSize, y * cellSize, cellSize, cellSize);
                 }
             }
         }
         g2.dispose();
+    }
+
+    public void toggleGridLines() {
+        showGridLines = !showGridLines;
+        repaint();
+    }
+
+    public void setPaintMode(PaintMode paintMode) {
+        this.paintMode = paintMode;
     }
 }
