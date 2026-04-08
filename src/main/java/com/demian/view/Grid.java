@@ -6,6 +6,7 @@ import com.demian.view.painting.PaintMode;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 public class Grid extends JPanel {
@@ -23,6 +24,8 @@ public class Grid extends JPanel {
 
     private Runnable onNextGenerationRequested;
 
+//    private Deque<Map<Point, Integer>> recentlyPaintedPoints;
+    private Map<Point, Integer> recentlyPaintedPoints;
 
     private DebugDrawer debugDrawer;
 
@@ -31,9 +34,10 @@ public class Grid extends JPanel {
         this.scale = 1.0;
         this.translateX = 0;
         this.translateY = 0;
+        this.paintMode = PaintMode.NORMAL;
+        this.recentlyPaintedPoints = new HashMap<>();
         this.lastDragPoint = new Point(-1, -1);
         this.lastGridPaintPoint = new Point(-1, -1);
-        this.paintMode = PaintMode.NORMAL;
         this.showGridLines = true;
         this.debugDrawer = new DebugDrawer();
 
@@ -144,10 +148,12 @@ public class Grid extends JPanel {
             lastGridPaintPoint = newGridPoint;
             if (plane.getCell(newGridPoint.x, newGridPoint.y).state == 1 && paintMode == PaintMode.ERASE) {
                 handleCellClick(e);
+                recentlyPaintedPoints.put(newGridPoint, 1);
             }
 
             if (plane.getCell(newGridPoint.x, newGridPoint.y).state != 1 && paintMode == PaintMode.NORMAL) {
                 handleCellClick(e);
+                recentlyPaintedPoints.put(newGridPoint, 0);
             }
         }
     }
@@ -197,6 +203,13 @@ public class Grid extends JPanel {
             }
         }
         g2.dispose();
+    }
+
+    public void undoRecentPaint() {
+        for (Map.Entry<Point, Integer> entry : recentlyPaintedPoints.entrySet()) {
+            Point p = entry.getKey();
+            plane.getCell(p.x, p.y).state = entry.getValue();
+        }
     }
 
     public void toggleGridLines() {

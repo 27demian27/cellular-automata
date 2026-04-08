@@ -1,7 +1,5 @@
 package com.demian.view;
 
-import com.demian.controller.GUIController;
-import com.demian.model.Plane;
 import com.demian.model.RuleSet;
 import com.demian.view.painting.PaintMode;
 
@@ -10,6 +8,7 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class Menu extends JMenuBar {
@@ -112,6 +111,10 @@ public class Menu extends JMenuBar {
 
     private void addEditMenu() {
         JMenu editMenu = new JMenu("EDIT");
+
+        JMenuItem undoItem = new JMenuItem("Undo");
+        undoItem.addActionListener(e -> grid.undoRecentPaint());
+        editMenu.add(undoItem);
 
         JMenuItem randomizeItem = new JMenuItem("Randomize Grid");
         randomizeItem.addActionListener(e -> {
