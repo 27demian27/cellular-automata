@@ -24,8 +24,7 @@ public class Grid extends JPanel {
 
     private Runnable onNextGenerationRequested;
 
-//    private Deque<Map<Point, Integer>> recentlyPaintedPoints;
-    private Map<Point, Integer> recentlyPaintedPoints;
+    private Deque<Map<Point, Integer>> recentlyPaintedPoints;
 
     private DebugDrawer debugDrawer;
 
@@ -35,7 +34,7 @@ public class Grid extends JPanel {
         this.translateX = 0;
         this.translateY = 0;
         this.paintMode = PaintMode.NORMAL;
-        this.recentlyPaintedPoints = new HashMap<>();
+        this.recentlyPaintedPoints = new LinkedList<>();
         this.lastDragPoint = new Point(-1, -1);
         this.lastGridPaintPoint = new Point(-1, -1);
         this.showGridLines = true;
@@ -56,8 +55,10 @@ public class Grid extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 lastDragPoint = e.getPoint();
-                if (SwingUtilities.isLeftMouseButton(e))
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    recentlyPaintedPoints.push(new HashMap<>());
                     handleCellClick(e);
+                }
             }
 
             @Override
@@ -69,6 +70,7 @@ public class Grid extends JPanel {
             @Override
             public void mouseDragged(MouseEvent e) {
                 if (lastDragPoint == null) return;
+
 
                 if (SwingUtilities.isRightMouseButton(e)) {
                     setCursor(panningCursor);
@@ -113,11 +115,18 @@ public class Grid extends JPanel {
         });
 
         getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "nextGen");
+        getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control Z"), "undo");
         getActionMap().put("nextGen", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (onNextGenerationRequested != null)
                     onNextGenerationRequested.run();
+            }
+        });
+        getActionMap().put("undo", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                undoRecentPaint();
             }
         });
     }
@@ -138,8 +147,15 @@ public class Grid extends JPanel {
     private void handleCellClick(MouseEvent e) {
         Point gridPoint = toGridPoint(e.getPoint());
 
-        if (onCellToggled != null)
+        Map<Point, Integer> gridState = recentlyPaintedPoints.peek();
+        if (gridState != null) {
+                gridState.put(gridPoint, plane.getCell(gridPoint.x, gridPoint.y).state);
+        }
+
+        if (onCellToggled != null) {
             onCellToggled.accept(gridPoint.x, gridPoint.y);
+        }
+
     }
 
     private void handleCellPaintDrag(MouseEvent e) {
@@ -148,12 +164,9 @@ public class Grid extends JPanel {
             lastGridPaintPoint = newGridPoint;
             if (plane.getCell(newGridPoint.x, newGridPoint.y).state == 1 && paintMode == PaintMode.ERASE) {
                 handleCellClick(e);
-                recentlyPaintedPoints.put(newGridPoint, 1);
             }
-
             if (plane.getCell(newGridPoint.x, newGridPoint.y).state != 1 && paintMode == PaintMode.NORMAL) {
                 handleCellClick(e);
-                recentlyPaintedPoints.put(newGridPoint, 0);
             }
         }
     }
@@ -206,10 +219,15 @@ public class Grid extends JPanel {
     }
 
     public void undoRecentPaint() {
-        for (Map.Entry<Point, Integer> entry : recentlyPaintedPoints.entrySet()) {
+        Map<Point, Integer> gridState = recentlyPaintedPoints.poll();
+        if (gridState == null) return;
+
+        for (Map.Entry<Point, Integer> entry : gridState.entrySet()) {
             Point p = entry.getKey();
             plane.getCell(p.x, p.y).state = entry.getValue();
         }
+
+        repaint();
     }
 
     public void toggleGridLines() {
