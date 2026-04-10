@@ -8,7 +8,7 @@ import java.util.stream.IntStream;
 
 public class Plane {
 
-    private List<Cell> cells;
+    private Cell[][] cells;
 
     private int sizeX;
     private int sizeY;
@@ -30,17 +30,24 @@ public class Plane {
 
     public void initialize(int initialSizeX, int initialSizeY) {
         setSize(initialSizeX, initialSizeY);
-        cells = new ArrayList<>(initialSizeX * initialSizeY);
+        cells = new Cell[initialSizeX][initialSizeY];
 
         for (int y = 0; y < initialSizeY; y++) {
             for (int x = 0; x < initialSizeX; x++) {
-                cells.add(new Cell(x, y));
+                cells[y][x] = new Cell(x, y);
             }
         }
 
-        for (Cell c : cells) {
-            c.initializeNeighborhood(this);
+        for (Cell[] row : cells) {
+            for (Cell cell : row) {
+                cell.initializeNeighborhood(this);
+            }
         }
+    }
+
+    public void resize(int x1, int x2, int y1, int y2) {
+        List<Cell> newCells = new ArrayList<>((x2 - x1) * (y2 - y1));
+
     }
 
     public void setState(int state, int xPos, int yPos) {
@@ -48,9 +55,8 @@ public class Plane {
         if (!checkBounds(index))
             return;
 
-        Cell cell = cells.get(index);
+        Cell cell = cells[yPos][xPos];
         cell.state = state;
-        cells.set(index, cell);
     }
 
     public Optional<Integer> getState(int xPos, int yPos) {
@@ -60,19 +66,23 @@ public class Plane {
             return Optional.empty();
         }
 
-        return Optional.of(cells.get(index).state);
+        return Optional.of(cells[yPos][xPos].state);
     }
 
     public void killCells() {
-        for (Cell cell : cells) {
-            cell.state = 0;
+        for (Cell[] row : cells) {
+            for (Cell cell : row) {
+                cell.state = 0;
+            }
         }
     }
 
     public void randomizeCells() {
-        for (Cell cell : cells) {
-            boolean boolState = randomizer.nextBoolean();
-            cell.state = boolState ? 1 : 0;
+        for (Cell[] row : cells) {
+            for (Cell cell : row) {
+                boolean boolState = randomizer.nextBoolean();
+                cell.state = boolState ? 1 : 0;
+            }
         }
     }
 
@@ -80,12 +90,17 @@ public class Plane {
 
         ruleEnforcer.changeAlternation();
 
-        for (Cell c : cells) {
-            c.computeNextState(ruleEnforcer);
+        for (Cell[] row : cells) {
+            for (Cell cell : row) {
+                cell.computeNextState(ruleEnforcer);
+
+            }
         }
 
-        for (Cell c : cells) {
-            c.applyNextState();
+        for (Cell[] row : cells) {
+            for (Cell cell : row) {
+                cell.applyNextState();
+            }
         }
 
     }
@@ -108,7 +123,7 @@ public class Plane {
     }
 
     public Cell getCell(int x, int y) {
-        return cells.get(y * sizeX + x);
+        return cells[y][x];
     }
 
     public void setCurrentRuleSet(RuleSet ruleSet) {

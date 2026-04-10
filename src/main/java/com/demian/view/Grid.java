@@ -105,7 +105,7 @@ public class Grid extends JPanel {
             else
                 scale /= Math.pow(factor, notches);
 
-            scale = Math.max(0.05, Math.min(10.0, scale));
+            scale = Math.clamp(scale, 0.05, 10.0);
 
             Point p = e.getPoint();
             translateX = (int) (p.x - (p.x - translateX) * (scale / oldScale));
@@ -147,6 +147,9 @@ public class Grid extends JPanel {
     private void handleCellClick(MouseEvent e) {
         Point gridPoint = toGridPoint(e.getPoint());
 
+        if (!plane.checkBounds(gridPoint.x, gridPoint.y))
+            return;
+
         Map<Point, Integer> gridState = recentlyPaintedPoints.peek();
         if (gridState != null) {
                 gridState.put(gridPoint, plane.getCell(gridPoint.x, gridPoint.y).state);
@@ -159,13 +162,17 @@ public class Grid extends JPanel {
     }
 
     private void handleCellPaintDrag(MouseEvent e) {
-        Point newGridPoint = toGridPoint(e.getPoint());
-        if (!lastGridPaintPoint.equals(newGridPoint)) {
-            lastGridPaintPoint = newGridPoint;
-            if (plane.getCell(newGridPoint.x, newGridPoint.y).state == 1 && paintMode == PaintMode.ERASE) {
+        Point gridPoint = toGridPoint(e.getPoint());
+
+        if (!plane.checkBounds(gridPoint.x, gridPoint.y))
+            return;
+
+        if (!lastGridPaintPoint.equals(gridPoint)) {
+            lastGridPaintPoint = gridPoint;
+            if (plane.getCell(gridPoint.x, gridPoint.y).state == 1 && paintMode == PaintMode.ERASE) {
                 handleCellClick(e);
             }
-            if (plane.getCell(newGridPoint.x, newGridPoint.y).state != 1 && paintMode == PaintMode.NORMAL) {
+            if (plane.getCell(gridPoint.x, gridPoint.y).state != 1 && paintMode == PaintMode.NORMAL) {
                 handleCellClick(e);
             }
         }
