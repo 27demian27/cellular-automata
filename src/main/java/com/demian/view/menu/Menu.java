@@ -1,6 +1,8 @@
-package com.demian.view;
+package com.demian.view.menu;
 
+import com.demian.model.Plane;
 import com.demian.model.RuleSet;
+import com.demian.view.Grid;
 import com.demian.view.painting.PaintMode;
 
 import javax.swing.*;
@@ -8,7 +10,6 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.Set;
 import java.util.function.Consumer;
 
 public class Menu extends JMenuBar {
@@ -23,9 +24,13 @@ public class Menu extends JMenuBar {
     private Consumer<RuleSet> onRuleSetSelected;
     private Consumer<PaintMode> onPaintModeChanged;
 
+    private final Frame frame;
+    private final Plane plane;
     private final Grid grid;
 
-    public Menu(Grid grid) {
+    public Menu(Frame frame, Plane plane, Grid grid) {
+        this.frame = frame;
+        this.plane = plane;
         this.grid = grid;
 
         addRuleSetMenu();
@@ -134,7 +139,34 @@ public class Menu extends JMenuBar {
         toggleGridLinesItem.addActionListener(e -> grid.toggleGridLines());
         editMenu.add(toggleGridLinesItem);
 
+        JMenuItem resizeGridItem = getResizeGridItem();
+
+        editMenu.add(resizeGridItem);
+
+
+
         add(editMenu);
+    }
+
+    private JMenuItem getResizeGridItem() {
+        JMenuItem resizeGridItem = new JMenuItem("Resize Grid");
+        resizeGridItem.addActionListener(e -> {
+            ResizeDialog dialog = new ResizeDialog(frame, plane);
+            dialog.setVisible(true);
+
+            if (dialog.isConfirmed()) {
+                int x1 = dialog.getX1();
+                int x2 = dialog.getX2();
+                int y1 = dialog.getY1();
+                int y2 = dialog.getY2();
+
+                plane.resize(x1, x2, y1, y2);
+                grid.translate(x1, y1);
+                grid.setOriginPoint(new Point(x1, y1));
+                grid.repaint();
+            }
+        });
+        return resizeGridItem;
     }
 
     private void addBrushMenu() {

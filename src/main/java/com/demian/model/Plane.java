@@ -30,7 +30,7 @@ public class Plane {
 
     public void initialize(int initialSizeX, int initialSizeY) {
         setSize(initialSizeX, initialSizeY);
-        cells = new Cell[initialSizeX][initialSizeY];
+        cells = new Cell[initialSizeY][initialSizeX];
 
         for (int y = 0; y < initialSizeY; y++) {
             for (int x = 0; x < initialSizeX; x++) {
@@ -46,8 +46,35 @@ public class Plane {
     }
 
     public void resize(int x1, int x2, int y1, int y2) {
-        List<Cell> newCells = new ArrayList<>((x2 - x1) * (y2 - y1));
+        int newSizeX = x2 - x1;
+        int newSizeY = y2 - y1;
+        Cell[][] newCells = new Cell[newSizeY][newSizeX];
 
+        int x1old = x1;
+
+        for (int y = 0; y < newSizeY; y++) {
+            x1 = x1old;
+            for (int x = 0; x < newSizeX; x++) {
+                if ((y1 >= 0 && y1 < sizeY) && (x1 >= 0 && x1 < sizeX)) {
+                    Cell newCell = new Cell(x, y);
+                    newCell.state =  cells[y1][x1].state;
+                    newCells[y][x] = newCell;
+                } else {
+                    newCells[y][x] = new Cell(x, y);
+                }
+                x1++;
+            }
+            y1++;
+        }
+
+        setSize(newSizeX, newSizeY);
+        cells = newCells;
+
+        for (Cell[] row : cells) {
+            for (Cell cell : row) {
+                cell.initializeNeighborhood(this);
+            }
+        }
     }
 
     public void setState(int state, int xPos, int yPos) {

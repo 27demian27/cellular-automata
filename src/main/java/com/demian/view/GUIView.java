@@ -1,14 +1,15 @@
 package com.demian.view;
 
 import com.demian.model.Plane;
+import com.demian.view.menu.Menu;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class GUIView {
-    private JFrame frame;
-    private Grid grid;
-    private Menu menuBar;
+    private final JFrame frame;
+    private final Grid grid;
+    private final com.demian.view.menu.Menu menuBar;
 
     public GUIView(Plane plane) {
         frame = new JFrame("Cellular Automata");
@@ -18,7 +19,7 @@ public class GUIView {
         grid = new Grid(plane);
         frame.add(grid, BorderLayout.CENTER);
 
-        menuBar = new Menu(grid);
+        menuBar = new com.demian.view.menu.Menu(frame, plane, grid);
         frame.setJMenuBar(menuBar);
 
         frame.setSize(800, 800);

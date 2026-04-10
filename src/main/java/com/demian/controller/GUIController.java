@@ -2,7 +2,7 @@ package com.demian.controller;
 
 import com.demian.model.Plane;
 import com.demian.view.GUIView;
-import com.demian.view.Menu;
+import com.demian.view.menu.Menu;
 
 public class GUIController {
 
