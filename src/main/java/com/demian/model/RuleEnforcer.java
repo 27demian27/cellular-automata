@@ -13,14 +13,18 @@ public class RuleEnforcer {
 
     private RuleSet alternationRuleSet;
 
+    private List<Integer> customRuleBirth;
+
+    private List<Integer> customRuleSurvival;
     public RuleEnforcer(int sizeX, int sizeY) {
         this.sizeX = sizeX;
         this.sizeY = sizeY;
 
-
         alternationRuleSet = RuleSet.GAME_OF_LIFE;
         ruleSet = RuleSet.GAME_OF_LIFE;
         alternatingRules = new TreeSet<>();
+        customRuleBirth = new ArrayList<>();
+        customRuleSurvival = new ArrayList<>();
         iterator = alternatingRules.iterator();
     }
 
@@ -35,19 +39,14 @@ public class RuleEnforcer {
             currentRuleSet = alternationRuleSet;
         }
 
+        // TODO: CUSTOM RULES  B[..]/S[...]
         switch (currentRuleSet) {
-            case GAME_OF_LIFE -> {
-                state = gameOfLife(neighborhood);
-            }
-            case SIMPLE_GROWTH -> {
-                state = simpleGrowth(neighborhood);
-            }
-            case DIAG_GROWTH -> {
-                state = diagGrowth(neighborhood);
-            }
-            case RULE30 -> {
-                state = rule30(neighborhood);
-            }
+            case GAME_OF_LIFE -> state = gameOfLife(neighborhood);
+            case SIMPLE_GROWTH -> state = simpleGrowth(neighborhood);
+            case DIAG_GROWTH -> state = diagGrowth(neighborhood);
+            case RULE30 -> state = rule30(neighborhood);
+            case MAZE -> state = maze(neighborhood);
+            case CUSTOM -> state = customRule(neighborhood);
             default -> {
                 System.err.println("ERROR: NO RULESET SELECTED");
                 System.exit(1);
@@ -57,17 +56,7 @@ public class RuleEnforcer {
     }
 
     private int gameOfLife(MooreNeighborhood neighborhood) {
-        int neighborsCount = 0;
-
-        neighborsCount +=
-        neighborhood.TLstate() +
-        neighborhood.TMstate() +
-        neighborhood.TRstate() +
-        neighborhood.MLstate() +
-        neighborhood.MRstate() +
-        neighborhood.BLstate() +
-        neighborhood.BMstate() +
-        neighborhood.BRstate();
+        int neighborsCount = neighborhood.getNumOfAliveNeighbors();
 
         int MM = neighborhood.MMstate();
 
@@ -135,6 +124,30 @@ public class RuleEnforcer {
         return neighborhood.MMstate();
     }
 
+    private int maze(MooreNeighborhood neighborhood) {
+        int count  = neighborhood.getNumOfAliveNeighbors();
+        int MM = neighborhood.MMstate();
+
+        if (MM == 0 && count == 3)
+            return 1;
+        if (MM == 1 && (count >= 1 && count <= 4))
+            return 1;
+
+        return 0;
+    }
+
+    private int customRule(MooreNeighborhood neighborhood) {
+        int count  = neighborhood.getNumOfAliveNeighbors();
+        int MM = neighborhood.MMstate();
+
+        if (MM == 0 && customRuleBirth.contains(count))
+            return 1;
+        if (MM == 1 && customRuleSurvival.contains(count))
+            return 1;
+
+        return 0;
+    }
+
     private boolean checkBounds(int index) {
         return (index >= 0 && index < sizeX * sizeY);
     }
@@ -166,5 +179,18 @@ public class RuleEnforcer {
     public void removeAlternatingRuleSet(RuleSet ruleSet) {
         alternatingRules.remove(ruleSet);
         iterator = alternatingRules.iterator();
+    }
+
+    public void setCustomRuleSet(List<Integer> customRuleBirth, List<Integer> customRuleSurvival) {
+        this.customRuleBirth = customRuleBirth;
+        this.customRuleSurvival = customRuleSurvival;
+    }
+
+    public List<Integer> getCustomRuleBirth() {
+        return customRuleBirth;
+    }
+
+    public List<Integer> getCustomRuleSurvival() {
+        return customRuleSurvival;
     }
 }

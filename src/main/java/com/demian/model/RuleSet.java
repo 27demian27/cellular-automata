@@ -5,5 +5,7 @@ public enum RuleSet {
     SIMPLE_GROWTH,
     DIAG_GROWTH,
     RULE30,
+    MAZE,
+    CUSTOM,
     ALTERNATING
 }

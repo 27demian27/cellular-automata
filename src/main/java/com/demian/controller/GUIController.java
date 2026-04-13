@@ -45,6 +45,8 @@ public class GUIController {
             view.repaintGrid();
         });
 
+        menu.setOnCustomRulesetChanged(model::setCustomRuleSet);
+
         menu.setOnAlternatingRulesetAdded(model::addAlternatingRuleSet);
 
         menu.setOnAlternatingRulesetRemoved(model::removeAlternatingRuleSet);

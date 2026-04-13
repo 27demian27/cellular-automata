@@ -164,4 +164,16 @@ public class Plane {
     public void removeAlternatingRuleSet(RuleSet ruleSet) {
         ruleEnforcer.removeAlternatingRuleSet(ruleSet);
     }
+
+    public void setCustomRuleSet(List<Integer> customRuleBirth, List<Integer> customRuleSurvival) {
+       ruleEnforcer.setCustomRuleSet(customRuleBirth, customRuleSurvival);
+    }
+
+    public List<Integer> getCustomRuleBirth() {
+        return ruleEnforcer.getCustomRuleBirth();
+    }
+
+    public List<Integer> getCustomRuleSurvival() {
+        return ruleEnforcer.getCustomRuleSurvival();
+    }
 }

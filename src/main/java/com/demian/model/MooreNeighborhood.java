@@ -24,6 +24,21 @@ public class MooreNeighborhood {
         br = plane.checkBounds(x+1, y+1) ? plane.getCell(x+1, y+1) : null;
     }
 
+    public int getNumOfAliveNeighbors() {
+        int count = 0;
+
+        count +=
+                TLstate() +
+                TMstate() +
+                TRstate() +
+                MLstate() +
+                MRstate() +
+                BLstate() +
+                BMstate() +
+                BRstate();
+        return count;
+    }
+
 
     public int TLstate() { return (tl != null) ? tl.state : 0; }
     public int TMstate() { return (tm != null) ? tm.state : 0; }

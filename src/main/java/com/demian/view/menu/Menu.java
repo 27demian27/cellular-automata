@@ -10,6 +10,8 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class Menu extends JMenuBar {
@@ -23,6 +25,7 @@ public class Menu extends JMenuBar {
     private Consumer<RuleSet> onAlternatingRulesetRemoved;
     private Consumer<RuleSet> onRuleSetSelected;
     private Consumer<PaintMode> onPaintModeChanged;
+    private BiConsumer<List<Integer>, List<Integer>> onCustomRulesetChanged;
 
     private final Frame frame;
     private final Plane plane;
@@ -140,12 +143,29 @@ public class Menu extends JMenuBar {
         editMenu.add(toggleGridLinesItem);
 
         JMenuItem resizeGridItem = getResizeGridItem();
-
         editMenu.add(resizeGridItem);
 
+        JMenuItem editCustomRulesetItem = getEditCustomRulesetItem();
+        editMenu.add(editCustomRulesetItem);
 
 
         add(editMenu);
+    }
+
+    private JMenuItem getEditCustomRulesetItem() {
+        JMenuItem editCustomRulesetItem = new JMenuItem("Edit Custom Ruleset");
+        editCustomRulesetItem.addActionListener(e -> {
+            CustomRuleDialog customRuleDialog = new CustomRuleDialog(frame, plane);
+            customRuleDialog.setVisible(true);
+
+            if (customRuleDialog.isConfirmed()) {
+                List<Integer> birthRuleset = customRuleDialog.getSelectedBirth();
+                List<Integer> surviveRuleset = customRuleDialog.getSelectedSurvive();
+
+                onCustomRulesetChanged.accept(birthRuleset, surviveRuleset);
+            }
+        });
+        return editCustomRulesetItem;
     }
 
     private JMenuItem getResizeGridItem() {
@@ -213,4 +233,7 @@ public class Menu extends JMenuBar {
         this.onRandomizeRequested = onRandomizeRequested;
     }
 
+    public void setOnCustomRulesetChanged(BiConsumer<List<Integer>, List<Integer>> onCustomRulesetChanged) {
+        this.onCustomRulesetChanged = onCustomRulesetChanged;
+    }
 }
