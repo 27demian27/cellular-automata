@@ -38,6 +38,7 @@ public class Menu extends JMenuBar {
 
         addRuleSetMenu();
         addEditMenu();
+        addGridMenu();
         addBrushMenu();
     }
 
@@ -124,32 +125,43 @@ public class Menu extends JMenuBar {
         undoItem.addActionListener(e -> grid.undoRecentPaint());
         editMenu.add(undoItem);
 
-        JMenuItem randomizeItem = new JMenuItem("Randomize Grid");
-        randomizeItem.addActionListener(e -> {
-            if (onRandomizeRequested != null)
-                onRandomizeRequested.run();
-        });
-        editMenu.add(randomizeItem);
-
-        JMenuItem clearItem = new JMenuItem("Clear Grid");
-        clearItem.addActionListener(e -> {
-            if (onClearRequested != null)
-                onClearRequested.run();
-        });
-        editMenu.add(clearItem);
-
-        JMenuItem toggleGridLinesItem = new JMenuItem("Toggle Grid Lines");
-        toggleGridLinesItem.addActionListener(e -> grid.toggleGridLines());
-        editMenu.add(toggleGridLinesItem);
-
-        JMenuItem resizeGridItem = getResizeGridItem();
-        editMenu.add(resizeGridItem);
 
         JMenuItem editCustomRulesetItem = getEditCustomRulesetItem();
         editMenu.add(editCustomRulesetItem);
 
 
         add(editMenu);
+    }
+
+    private void addGridMenu() {
+        JMenu gridMenu = new JMenu("GRID");
+
+        JMenuItem randomizeItem = new JMenuItem("Randomize Grid");
+        randomizeItem.addActionListener(e -> {
+            if (onRandomizeRequested != null)
+                onRandomizeRequested.run();
+        });
+        gridMenu.add(randomizeItem);
+
+        JMenuItem clearItem = new JMenuItem("Clear Grid");
+        clearItem.addActionListener(e -> {
+            if (onClearRequested != null)
+                onClearRequested.run();
+        });
+        gridMenu.add(clearItem);
+
+        JMenuItem toggleGridLinesItem = new JMenuItem("Show Grid Lines");
+        toggleGridLinesItem.addActionListener(e -> grid.toggleGridLines());
+        gridMenu.add(toggleGridLinesItem);
+
+        JMenuItem showDebugItem = new JMenuItem("Show Debug");
+        showDebugItem.addActionListener(e -> grid.toggleShowDebug());
+        gridMenu.add(showDebugItem);
+
+        JMenuItem resizeGridItem = getResizeGridItem();
+        gridMenu.add(resizeGridItem);
+
+        add(gridMenu);
     }
 
     private JMenuItem getEditCustomRulesetItem() {

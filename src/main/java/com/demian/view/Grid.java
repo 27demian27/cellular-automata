@@ -13,15 +13,14 @@ public class Grid extends JPanel {
 
     private final Plane plane;
     private double scale;
-
     private int translateX;
-
     private int translateY;
     private Point lastDragPoint;
     private Point lastGridPaintPoint;
     private PaintMode paintMode;
     private boolean showGridLines;
     private Point originPoint;
+    private boolean showDebug;
 
     private BiConsumer<Integer, Integer> onCellToggled;
 
@@ -42,10 +41,21 @@ public class Grid extends JPanel {
         this.lastDragPoint = new Point(-1, -1);
         this.lastGridPaintPoint = new Point(-1, -1);
         this.showGridLines = true;
-        this.debugDrawer = new DebugDrawer();
+        this.showDebug = false;
 
         setBackground(Color.DARK_GRAY);
+        setLayout(new OverlayLayout(this));
+        configerDebugDrawer();
         configureControls();
+    }
+
+    private void configerDebugDrawer() {
+        debugDrawer = new DebugDrawer(this);
+        debugDrawer.setVisible(true);
+        debugDrawer.setOpaque(false);
+        debugDrawer.setBounds(0, 0, getWidth(), getHeight());
+
+        add(debugDrawer);
     }
 
     private void configureControls() {
@@ -72,6 +82,15 @@ public class Grid extends JPanel {
             }
 
             @Override
+            public void mouseMoved(MouseEvent e) {
+                if (showDebug) {
+                    debugDrawer.setMousePoint(e.getPoint());
+                    debugDrawer.setMouseGridPoint(toGridPoint(e.getPoint()));
+                    debugDrawer.repaint();
+                }
+            }
+
+            @Override
             public void mouseDragged(MouseEvent e) {
                 if (lastDragPoint == null) return;
 
@@ -92,6 +111,12 @@ public class Grid extends JPanel {
                         lastDragPoint = e.getPoint();
                         handleCellPaintDrag(e);
                     }
+                }
+
+                if (showDebug) {
+                    debugDrawer.setMousePoint(e.getPoint());
+                    debugDrawer.setMouseGridPoint(toGridPoint(e.getPoint()));
+                    debugDrawer.repaint();
                 }
             }
         };
@@ -226,6 +251,7 @@ public class Grid extends JPanel {
                 }
             }
         }
+
         g2.dispose();
     }
 
@@ -246,16 +272,17 @@ public class Grid extends JPanel {
         repaint();
     }
 
+    public void toggleShowDebug() {
+        showDebug = !showDebug;
+        repaint();
+    }
+
     public void setPaintMode(PaintMode paintMode) {
         this.paintMode = paintMode;
     }
 
     public void setOriginPoint(Point originPoint) {
         this.originPoint = originPoint;
-    }
-
-    public Point getOriginPoint() {
-        return originPoint;
     }
 
     public void translate(int translateX, int translateY) {

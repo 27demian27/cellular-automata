@@ -9,7 +9,7 @@ import java.awt.*;
 public class GUIView {
     private final JFrame frame;
     private final Grid grid;
-    private final com.demian.view.menu.Menu menuBar;
+    private final Menu menuBar;
 
     public GUIView(Plane plane) {
         frame = new JFrame("Cellular Automata");
@@ -19,7 +19,7 @@ public class GUIView {
         grid = new Grid(plane);
         frame.add(grid, BorderLayout.CENTER);
 
-        menuBar = new com.demian.view.menu.Menu(frame, plane, grid);
+        menuBar = new Menu(frame, plane, grid);
         frame.setJMenuBar(menuBar);
 
         frame.setSize(800, 800);
