@@ -4,6 +4,7 @@ import com.demian.model.Plane;
 import com.demian.view.GUIView;
 import com.demian.view.menu.Menu;
 
+
 public class GUIController {
 
     private final Plane model;

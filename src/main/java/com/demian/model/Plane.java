@@ -1,5 +1,7 @@
 package com.demian.model;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +12,12 @@ public class Plane {
 
     private Cell[][] cells;
 
+    @Getter
+    private int aliveCellCount;
+
+    @Getter
     private int sizeX;
+    @Getter
     private int sizeY;
 
     RuleEnforcer ruleEnforcer;
@@ -31,6 +38,7 @@ public class Plane {
     public void initialize(int initialSizeX, int initialSizeY) {
         setSize(initialSizeX, initialSizeY);
         cells = new Cell[initialSizeY][initialSizeX];
+        aliveCellCount = 0;
 
         for (int y = 0; y < initialSizeY; y++) {
             for (int x = 0; x < initialSizeX; x++) {
@@ -84,6 +92,8 @@ public class Plane {
 
         Cell cell = cells[yPos][xPos];
         cell.state = state;
+
+        if (state == 1)  aliveCellCount++; else aliveCellCount--;
     }
 
     public Optional<Integer> getState(int xPos, int yPos) {
@@ -102,6 +112,8 @@ public class Plane {
                 cell.state = 0;
             }
         }
+
+        recountAliveCells();
     }
 
     public void randomizeCells() {
@@ -111,6 +123,8 @@ public class Plane {
                 cell.state = boolState ? 1 : 0;
             }
         }
+
+        recountAliveCells();
     }
 
     public void simulateGeneration() {
@@ -130,6 +144,16 @@ public class Plane {
             }
         }
 
+        recountAliveCells();
+    }
+
+    private void recountAliveCells() {
+        aliveCellCount = 0;
+        for (Cell[] row : cells) {
+            for (Cell cell : row) {
+                if (cell.state == 1) aliveCellCount++;
+            }
+        }
     }
 
     private boolean checkBounds(int index) {
@@ -138,15 +162,6 @@ public class Plane {
 
     public boolean checkBounds(int x, int y) {
         return (x >= 0 && x < sizeX && y >= 0 && y < sizeY);
-    }
-
-
-    public int getSizeX() {
-        return sizeX;
-    }
-
-    public int getSizeY() {
-        return sizeY;
     }
 
     public Cell getCell(int x, int y) {

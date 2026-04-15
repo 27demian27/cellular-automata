@@ -1,6 +1,7 @@
 package com.demian.view.menu;
 
 import com.demian.model.Plane;
+import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +14,7 @@ public class ResizeDialog extends JDialog {
     private final JTextField y1Field = new JTextField(5);
     private final JTextField y2Field = new JTextField(5);
 
+    @Getter
     private boolean confirmed = false;
 
     private final Plane plane;
@@ -78,10 +80,6 @@ public class ResizeDialog extends JDialog {
             JOptionPane.showMessageDialog(this, "Please enter valid integers.");
             return false;
         }
-    }
-
-    public boolean isConfirmed() {
-        return confirmed;
     }
 
     public int getX1() { return Integer.parseInt(x1Field.getText()); }

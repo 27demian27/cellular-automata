@@ -3,7 +3,7 @@ package com.demian.model;
 
 public class MooreNeighborhood {
 
-    private Cell centralCell;
+    private final Cell centralCell;
     private Cell tl, tm, tr, ml, mr, bl, bm, br;
 
     public MooreNeighborhood(Cell centralCell) {

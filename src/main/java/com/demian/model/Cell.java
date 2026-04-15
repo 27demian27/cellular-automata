@@ -1,15 +1,19 @@
 package com.demian.model;
 
-import java.util.Arrays;
+import lombok.Getter;
+
 
 public class Cell {
 
-    private int x;
-    private int y;
+    @Getter
+    private final int x;
+    @Getter
+    private final int y;
 
     public int state;
     private int nextState;
 
+    @Getter
     private MooreNeighborhood neighborhood;
 
     public Cell(int x, int y) {
@@ -35,15 +39,4 @@ public class Cell {
         state = nextState;
     }
 
-    public MooreNeighborhood getNeighborhood() {
-        return neighborhood;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public int getX() {
-        return x;
-    }
 }

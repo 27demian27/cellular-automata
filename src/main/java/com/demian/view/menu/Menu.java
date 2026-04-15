@@ -194,7 +194,6 @@ public class Menu extends JMenuBar {
 
                 plane.resize(x1, x2, y1, y2);
                 grid.translate(x1, y1);
-                grid.setOriginPoint(new Point(x1, y1));
                 grid.repaint();
             }
         });

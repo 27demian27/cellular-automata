@@ -2,13 +2,19 @@ package com.demian.view;
 
 import com.demian.model.Plane;
 import com.demian.view.menu.Menu;
+import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
 
+
 public class GUIView {
+
     private final JFrame frame;
+
+    @Getter
     private final Grid grid;
+    @Getter
     private final Menu menuBar;
 
     public GUIView(Plane plane) {
@@ -28,14 +34,6 @@ public class GUIView {
 
     public void show() {
         frame.setVisible(true);
-    }
-
-    public Grid getGrid() {
-        return grid;
-    }
-
-    public Menu getMenuBar() {
-        return menuBar;
     }
 
     public void repaintGrid() {

@@ -2,6 +2,8 @@ package com.demian.view;
 
 import com.demian.model.Plane;
 import com.demian.view.painting.PaintMode;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,22 +13,31 @@ import java.util.function.BiConsumer;
 
 public class Grid extends JPanel {
 
+    @Getter
     private final Plane plane;
+
     private double scale;
+
+    @Getter
     private int translateX;
+    @Getter
     private int translateY;
+
     private Point lastDragPoint;
     private Point lastGridPaintPoint;
+
+    private final Deque<Map<Point, Integer>> recentlyPaintedPoints;
+    @Setter
     private PaintMode paintMode;
     private boolean showGridLines;
-    private Point originPoint;
+
+    @Getter
     private boolean showDebug;
-
+    @Setter
     private BiConsumer<Integer, Integer> onCellToggled;
-
+    @Setter
     private Runnable onNextGenerationRequested;
 
-    private Deque<Map<Point, Integer>> recentlyPaintedPoints;
 
     private DebugDrawer debugDrawer;
 
@@ -35,7 +46,6 @@ public class Grid extends JPanel {
         this.scale = 1.0;
         this.translateX = 0;
         this.translateY = 0;
-        this.originPoint = new Point(0, 0);
         this.paintMode = PaintMode.NORMAL;
         this.recentlyPaintedPoints = new LinkedList<>();
         this.lastDragPoint = new Point(-1, -1);
@@ -45,11 +55,11 @@ public class Grid extends JPanel {
 
         setBackground(Color.DARK_GRAY);
         setLayout(new OverlayLayout(this));
-        configerDebugDrawer();
+        configureDebugDrawer();
         configureControls();
     }
 
-    private void configerDebugDrawer() {
+    private void configureDebugDrawer() {
         debugDrawer = new DebugDrawer(this);
         debugDrawer.setVisible(true);
         debugDrawer.setOpaque(false);
@@ -207,14 +217,6 @@ public class Grid extends JPanel {
         }
     }
 
-    public void setOnCellToggled(BiConsumer<Integer, Integer> listener) {
-        this.onCellToggled = listener;
-    }
-
-    public void setOnNextGenerationRequested(Runnable listener) {
-        this.onNextGenerationRequested = listener;
-    }
-
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -243,11 +245,11 @@ public class Grid extends JPanel {
                 int state = plane.getState(x, y).orElse(0);
                 if (state == 1) {
                     g2.setColor(Color.BLACK);
-                    g2.fillRect(0 + x * cellSize, 0 + y * cellSize, cellSize, cellSize);
+                    g2.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
                 }
                 if (showGridLines && scale > minScaleForBorderDraw) {
                     g2.setColor(Color.BLACK);
-                    g2.drawRect(0 + x * cellSize, 0 + y * cellSize, cellSize, cellSize);
+                    g2.drawRect(x * cellSize, y * cellSize, cellSize, cellSize);
                 }
             }
         }
@@ -277,16 +279,9 @@ public class Grid extends JPanel {
         repaint();
     }
 
-    public void setPaintMode(PaintMode paintMode) {
-        this.paintMode = paintMode;
-    }
-
-    public void setOriginPoint(Point originPoint) {
-        this.originPoint = originPoint;
-    }
-
     public void translate(int translateX, int translateY) {
         this.translateX += translateX;
         this.translateY += translateY;
     }
+
 }
