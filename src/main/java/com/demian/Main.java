@@ -17,7 +17,7 @@ public class Main {
 
             GUIView view = new GUIView(model);
             SaveController saveController = new SaveController(model);
-            GUIController controller = new GUIController(saveController, model, view);
+            GUIController guiController = new GUIController(saveController, model, view);
 
             view.show();
         });

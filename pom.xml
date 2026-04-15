@@ -36,9 +36,6 @@
                 <version>3.2.0</version>
                 <configuration>
                     <mainClass>com.demian.Main</mainClass>
-                    <arguments>
-                        <argument>argument1</argument>
-                    </arguments>
                 </configuration>
             </plugin>
         </plugins>
