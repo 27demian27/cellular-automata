@@ -21,3 +21,6 @@ Features include:
 ### How to run
 ``mvn compile`` \
 ``mvn exec:java``
+
+⚠️ EPILEPSY WARNING ⚠️ \
+*Certain rules, in particular, using alternating rules will cause flashing screens when holding spacebar.*
