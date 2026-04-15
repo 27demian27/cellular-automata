@@ -1,5 +1,6 @@
 package com.demian;
 
+import com.demian.controller.SaveController;
 import com.demian.model.Plane;
 import com.demian.view.GUIView;
 import com.demian.controller.GUIController;
@@ -15,7 +16,8 @@ public class Main {
             model.initialize(200, 200);
 
             GUIView view = new GUIView(model);
-            GUIController controller = new GUIController(model, view);
+            SaveController saveController = new SaveController(model);
+            GUIController controller = new GUIController(saveController, model, view);
 
             view.show();
         });

@@ -4,28 +4,41 @@ import com.demian.model.Plane;
 import com.demian.model.RuleSet;
 import com.demian.view.Grid;
 import com.demian.view.painting.PaintMode;
+import lombok.Setter;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class Menu extends JMenuBar {
 
+    @Setter
     private Runnable onClearRequested;
+    @Setter
     private Runnable onNextGenerationRequested;
+    @Setter
     private Runnable onRandomizeRequested;
+    @Setter
+    private Runnable onStateSaveRequested;
 
 
+    @Setter
     private Consumer<RuleSet> onAlternatingRulesetAdded;
+    @Setter
     private Consumer<RuleSet> onAlternatingRulesetRemoved;
+    @Setter
     private Consumer<RuleSet> onRuleSetSelected;
-    private Consumer<PaintMode> onPaintModeChanged;
+    @Setter
     private BiConsumer<List<Integer>, List<Integer>> onCustomRulesetChanged;
+    @Setter
+    private Consumer<String> onStateLoadRequested;
 
     private final Frame frame;
     private final Plane plane;
@@ -40,6 +53,11 @@ public class Menu extends JMenuBar {
         addEditMenu();
         addGridMenu();
         addBrushMenu();
+        addStateMenu();
+    }
+
+    public void showErrorDialog(Exception e) {
+        e.printStackTrace();
     }
 
     private void addRuleSetMenu() {
@@ -121,10 +139,16 @@ public class Menu extends JMenuBar {
     private void addEditMenu() {
         JMenu editMenu = new JMenu("EDIT");
 
-        JMenuItem undoItem = new JMenuItem("Undo");
+        JMenuItem undoItem = new JMenuItem("Undo Paint");
         undoItem.addActionListener(e -> grid.undoRecentPaint());
         editMenu.add(undoItem);
 
+        JMenuItem nextGenItem = new JMenuItem("Next Generation");
+        nextGenItem.addActionListener(e -> {
+            if (onNextGenerationRequested != null)
+                onNextGenerationRequested.run();
+        });
+        editMenu.add(nextGenItem);
 
         JMenuItem editCustomRulesetItem = getEditCustomRulesetItem();
         editMenu.add(editCustomRulesetItem);
@@ -192,6 +216,7 @@ public class Menu extends JMenuBar {
                 int y1 = dialog.getY1();
                 int y2 = dialog.getY2();
 
+                // Moet via controller
                 plane.resize(x1, x2, y1, y2);
                 grid.translate(x1, y1);
                 grid.repaint();
@@ -220,31 +245,36 @@ public class Menu extends JMenuBar {
         add(brushMenu);
     }
 
-    public void setOnClearRequested(Runnable onClearRequested) {
-        this.onClearRequested = onClearRequested;
+    private void addStateMenu() {
+        JMenu stateMenu = new JMenu("SAVE/LOAD");
+
+        JMenuItem saveItem = new JMenuItem("Save State");
+        saveItem.addActionListener(e -> {
+            if (onStateSaveRequested != null)
+                onStateSaveRequested.run();
+        });
+        stateMenu.add(saveItem);
+
+        JMenuItem loadItem = new JMenuItem("Load State");
+        loadItem.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setCurrentDirectory(new File("src/main/resources/saves"));
+            chooser.setFileFilter(new FileNameExtensionFilter("Save Files", "stt"));
+
+            int result = chooser.showOpenDialog(frame);;
+
+            if (result == JFileChooser.APPROVE_OPTION) {
+                String fileName = chooser.getSelectedFile().getName();
+
+                if (onStateLoadRequested != null)
+                    onStateLoadRequested.accept(fileName);
+            }
+            grid.repaint();
+        });
+        stateMenu.add(loadItem);
+
+
+        add(stateMenu);
     }
 
-    public void setOnNextGenerationRequested(Runnable onNextGenerationRequested) {
-        this.onNextGenerationRequested = onNextGenerationRequested;
-    }
-
-    public void setOnRuleSetSelected(Consumer<RuleSet> onRuleSetSelected) {
-        this.onRuleSetSelected = onRuleSetSelected;
-    }
-
-    public void setOnAlternatingRulesetAdded(Consumer<RuleSet> onAlternatingRulesetAdded) {
-        this.onAlternatingRulesetAdded = onAlternatingRulesetAdded;
-    }
-
-    public void setOnAlternatingRulesetRemoved(Consumer<RuleSet> onAlternatingRulesetRemoved) {
-        this.onAlternatingRulesetRemoved = onAlternatingRulesetRemoved;
-    }
-
-    public void setOnRandomizeRequested(Runnable onRandomizeRequested) {
-        this.onRandomizeRequested = onRandomizeRequested;
-    }
-
-    public void setOnCustomRulesetChanged(BiConsumer<List<Integer>, List<Integer>> onCustomRulesetChanged) {
-        this.onCustomRulesetChanged = onCustomRulesetChanged;
-    }
 }

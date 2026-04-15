@@ -4,13 +4,18 @@ import com.demian.model.Plane;
 import com.demian.view.GUIView;
 import com.demian.view.menu.Menu;
 
+import java.io.IOException;
+
 
 public class GUIController {
+
+    private final SaveController saveController;
 
     private final Plane model;
     private GUIView view;
 
-    public GUIController(Plane model, GUIView view) {
+    public GUIController(SaveController saveController, Plane model, GUIView view) {
+        this.saveController = saveController;
         this.model = model;
         this.view = view;
 
@@ -51,6 +56,22 @@ public class GUIController {
         menu.setOnAlternatingRulesetAdded(model::addAlternatingRuleSet);
 
         menu.setOnAlternatingRulesetRemoved(model::removeAlternatingRuleSet);
+
+        menu.setOnStateSaveRequested(() -> {
+            try {
+                saveController.saveState();
+            } catch (IOException e) {
+                menu.showErrorDialog(e);
+            }
+        });
+
+        menu.setOnStateLoadRequested(name -> {
+            try {
+                saveController.loadState(name);
+            } catch (IOException e) {
+                menu.showErrorDialog(e);
+            }
+        });
     }
 
     public void nextGeneration() {
