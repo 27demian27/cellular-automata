@@ -37,9 +37,9 @@ public class SaveController {
 
     public void saveState() throws IOException {
         Path saveFile = savesDir.resolve("save"+saveFileNameUID+".stt");
-        try(OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(saveFile.toFile()))) {
-            outputStream.write(model.getSizeX());
-            outputStream.write(model.getSizeY());
+        try(DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(saveFile.toFile()))) {
+            outputStream.writeInt(model.getSizeX());
+            outputStream.writeInt(model.getSizeY());;
 
             model.forEachCell(c -> {
                 try {
@@ -58,9 +58,10 @@ public class SaveController {
         if (!saveFile.toFile().isFile())
             throw new FileNotFoundException();
 
-        try(InputStream inputStream = new BufferedInputStream(new FileInputStream(saveFile.toFile()))) {
-            int sizeX = inputStream.read();
-            int sizeY = inputStream.read();
+        try(DataInputStream inputStream = new DataInputStream(new FileInputStream(saveFile.toFile()))) {
+            int sizeX = inputStream.readInt();
+            int sizeY = inputStream.readInt();
+
 
             if (sizeX != model.getSizeX() || sizeY != model.getSizeY())
                 model.initialize(sizeX, sizeY);
