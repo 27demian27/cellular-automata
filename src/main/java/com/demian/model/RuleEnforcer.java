@@ -1,11 +1,14 @@
 package com.demian.model;
 
+import lombok.Setter;
+
 import java.util.*;
 
 public class RuleEnforcer {
 
     int sizeX;
     int sizeY;
+    @Setter
     private RuleSet ruleSet;
 
     private Set<RuleSet> alternatingRules;
@@ -39,12 +42,12 @@ public class RuleEnforcer {
             currentRuleSet = alternationRuleSet;
         }
 
-        // TODO: CUSTOM RULES  B[..]/S[...]
         switch (currentRuleSet) {
             case GAME_OF_LIFE -> state = gameOfLife(neighborhood);
             case SIMPLE_GROWTH -> state = simpleGrowth(neighborhood);
             case DIAG_GROWTH -> state = diagGrowth(neighborhood);
             case RULE30 -> state = rule30(neighborhood);
+            case RULE110 -> state = rule110(neighborhood);
             case MAZE -> state = maze(neighborhood);
             case CUSTOM -> state = customRule(neighborhood);
             default -> {
@@ -124,6 +127,29 @@ public class RuleEnforcer {
         return neighborhood.MMstate();
     }
 
+    private int rule110(MooreNeighborhood neighborhood) {
+        int TL = neighborhood.TLstate();
+        int TM = neighborhood.TMstate();
+        int TR = neighborhood.TRstate();
+        
+        if (TL == 1 && TM == 1 && TR == 1)
+            return 0;
+        if (TL == 1 && TM == 1 && TR == 0)
+            return 1;
+        if (TL == 1 && TM == 0 && TR == 1)
+            return 1;
+        if (TL == 1 && TM == 0 && TR == 0)
+            return 0;
+        if (TL == 0 && TM == 1 && TR == 1)
+            return 1;
+        if (TL == 0 && TM == 1 && TR == 0)
+            return 1;
+        if (TL == 0 && TM == 0 && TR == 1)
+            return 1;
+
+        return neighborhood.MMstate();
+    }
+
     private int maze(MooreNeighborhood neighborhood) {
         int count  = neighborhood.getNumOfAliveNeighbors();
         int MM = neighborhood.MMstate();
@@ -150,10 +176,6 @@ public class RuleEnforcer {
 
     private boolean checkBounds(int index) {
         return (index >= 0 && index < sizeX * sizeY);
-    }
-
-    public void setRuleSet(RuleSet newRuleSet) {
-        this.ruleSet = newRuleSet;
     }
 
     public void setSize(int sizeX, int sizeY) {
