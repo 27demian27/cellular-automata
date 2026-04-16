@@ -1,5 +1,6 @@
 package com.demian.model;
 
+import lombok.Getter;
 import lombok.Setter;
 
 import java.util.*;
@@ -16,8 +17,10 @@ public class RuleEnforcer {
 
     private RuleSet alternationRuleSet;
 
+    @Getter
     private List<Integer> customRuleBirth;
 
+    @Getter
     private List<Integer> customRuleSurvival;
     public RuleEnforcer(int sizeX, int sizeY) {
         this.sizeX = sizeX;
@@ -131,7 +134,7 @@ public class RuleEnforcer {
         int TL = neighborhood.TLstate();
         int TM = neighborhood.TMstate();
         int TR = neighborhood.TRstate();
-        
+
         if (TL == 1 && TM == 1 && TR == 1)
             return 0;
         if (TL == 1 && TM == 1 && TR == 0)
@@ -208,11 +211,4 @@ public class RuleEnforcer {
         this.customRuleSurvival = customRuleSurvival;
     }
 
-    public List<Integer> getCustomRuleBirth() {
-        return customRuleBirth;
-    }
-
-    public List<Integer> getCustomRuleSurvival() {
-        return customRuleSurvival;
-    }
 }
