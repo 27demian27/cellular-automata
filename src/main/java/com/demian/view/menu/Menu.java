@@ -2,6 +2,7 @@ package com.demian.view.menu;
 
 import com.demian.model.Plane;
 import com.demian.model.RuleSet;
+import com.demian.util.Bounds;
 import com.demian.view.Grid;
 import com.demian.view.painting.PaintMode;
 import lombok.Setter;
@@ -29,7 +30,6 @@ public class Menu extends JMenuBar {
     @Setter
     private Runnable onStateSaveRequested;
 
-
     @Setter
     private Consumer<RuleSet> onAlternatingRulesetAdded;
     @Setter
@@ -41,7 +41,7 @@ public class Menu extends JMenuBar {
     @Setter
     private Consumer<String> onStateLoadRequested;
     @Setter
-    private Consumer<Map<String, Integer>> onResizeRequested;
+    private Consumer<Bounds> onResizeRequested;
 
     private final Frame frame;
     private final Plane plane;
@@ -220,7 +220,7 @@ public class Menu extends JMenuBar {
                 int y2 = dialog.getY2();
 
                 if (onResizeRequested != null)
-                    onResizeRequested.accept(Map.of("X1", x1, "X2", x2, "Y1", y1, "Y2", y2));
+                    onResizeRequested.accept(new Bounds(x1, x2, y1, y2));
             }
         });
         return resizeGridItem;

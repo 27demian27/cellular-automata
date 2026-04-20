@@ -1,9 +1,14 @@
 package com.demian.model;
 
+import com.demian.util.Bounds;
 import lombok.Getter;
 
 import java.net.Inet4Address;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -151,6 +156,60 @@ public class Plane {
             for (Cell cell : row) {
                 cell.applyNextState();
             }
+        }
+
+        recountAliveCells();
+    }
+
+    public void simulateGenerationThreaded() {
+        ruleEnforcer.changeAlternation();
+
+        int chunkSize = 32;
+
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+
+        try {
+            List<Callable<Void>> computeTasks = new ArrayList<>();
+
+            for (int startY = 0; startY < cells.length; startY+=chunkSize) {
+                int endY = Math.min(startY + chunkSize, cells.length);
+                int finalStartY = startY;
+
+//                System.out.println("Computing rows " + startY + " - " + endY);
+                computeTasks.add(() -> {
+                    for (int i = finalStartY; i < endY; i++) {
+                        for (int j = 0; j < cells[i].length; j++) {
+                            cells[i][j].computeNextState(ruleEnforcer);
+
+                        }
+                    }
+                    return null;
+                });
+            }
+
+            executor.invokeAll(computeTasks);
+
+            for (int startY = 0; startY < cells.length; startY+=chunkSize) {
+                int endY = Math.min(startY + chunkSize, cells.length);
+                int finalStartY = startY;
+
+//                System.out.println("Applying rows " + startY + " - " + endY);
+                computeTasks.add(() -> {
+                    for (int i = finalStartY; i < endY; i++) {
+                        for (int j = 0; j < cells[i].length; j++) {
+                            cells[i][j].applyNextState();
+
+                        }
+                    }
+                    return null;
+                });
+            }
+            executor.invokeAll(computeTasks);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            executor.shutdown();
         }
 
         recountAliveCells();

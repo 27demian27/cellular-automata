@@ -1,6 +1,7 @@
 package com.demian.view;
 
 import com.demian.model.Plane;
+import com.demian.util.Bounds;
 import com.demian.view.painting.PaintMode;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +29,8 @@ public class Grid extends JPanel {
     private Point lastDragPoint;
     private Point lastGridPaintPoint;
 
+    @Getter
+    private Bounds viewBounds;
     private final Deque<Map<Point, Integer>> recentlyPaintedPoints;
     @Setter
     private PaintMode paintMode;
@@ -44,8 +47,8 @@ public class Grid extends JPanel {
 
     private BufferedImage buffer;
 
-    private final static int cellSize = 20;
-    private final static double minScaleForBorderDraw = 0.2;
+    public final static int cellSize = 20;
+    public final static double minScaleForBorderDraw = 0.2;
 
     public Grid(Plane plane) {
         this.plane = plane;
@@ -248,6 +251,8 @@ public class Grid extends JPanel {
         int endX   = Math.min(plane.getSizeX(), (clip.x + clip.width) / cellSize + 1);
         int startY = Math.max(0, clip.y / cellSize);
         int endY   = Math.min(plane.getSizeY(), (clip.y + clip.height) / cellSize + 1);
+
+        viewBounds = new Bounds(startX, endX, startY, endY);
 
         if (showGridLines && scale > minScaleForBorderDraw) {
             g2.setColor(Color.BLACK);

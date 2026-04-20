@@ -30,7 +30,11 @@ public class GUIController {
             view.repaintGrid();
         });
 
-        view.getGrid().setOnNextGenerationRequested(this::nextGeneration);
+        view.getGrid().setOnNextGenerationRequested(() -> {
+//            System.out.println(view.getGrid().getViewBounds());
+            model.simulateGeneration();
+            view.repaintGrid();
+        });
     }
 
     private void setMenuListeners(Menu menu) {
@@ -44,7 +48,10 @@ public class GUIController {
             view.repaintGrid();
         });
 
-        menu.setOnNextGenerationRequested(this::nextGeneration);
+        menu.setOnNextGenerationRequested(() -> {
+            model.simulateGeneration();
+            view.repaintGrid();
+        });
 
         menu.setOnRuleSetSelected(ruleSet -> {
             model.setCurrentRuleSet(ruleSet);
@@ -74,14 +81,9 @@ public class GUIController {
         });
 
         menu.setOnResizeRequested(newBounds -> {
-            model.resize(newBounds.get("X1"), newBounds.get("X2"), newBounds.get("Y1"), newBounds.get("Y2"));
-            view.resizeGrid(newBounds.get("X1"), newBounds.get("Y1"));
+            model.resize(newBounds.x1(), newBounds.x2(), newBounds.y1(), newBounds.y2());
+            view.resizeGrid(newBounds.x1(), newBounds.y1());
             view.repaintGrid();
         });
-    }
-
-    public void nextGeneration() {
-        model.simulateGeneration();
-        view.repaintGrid();
     }
 }
