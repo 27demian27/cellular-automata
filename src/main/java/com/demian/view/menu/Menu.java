@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -39,6 +40,8 @@ public class Menu extends JMenuBar {
     private BiConsumer<List<Integer>, List<Integer>> onCustomRulesetChanged;
     @Setter
     private Consumer<String> onStateLoadRequested;
+    @Setter
+    private Consumer<Map<String, Integer>> onResizeRequested;
 
     private final Frame frame;
     private final Plane plane;
@@ -216,10 +219,8 @@ public class Menu extends JMenuBar {
                 int y1 = dialog.getY1();
                 int y2 = dialog.getY2();
 
-                // Moet via controller
-                plane.resize(x1, x2, y1, y2);
-                grid.translate(x1, y1);
-                grid.repaint();
+                if (onResizeRequested != null)
+                    onResizeRequested.accept(Map.of("X1", x1, "X2", x2, "Y1", y1, "Y2", y2));
             }
         });
         return resizeGridItem;

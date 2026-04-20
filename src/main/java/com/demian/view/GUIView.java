@@ -23,6 +23,7 @@ public class GUIView {
         frame.setLayout(new BorderLayout());
 
         grid = new Grid(plane);
+        grid.configure();
         frame.add(grid, BorderLayout.CENTER);
 
         menuBar = new Menu(frame, plane, grid);
@@ -36,7 +37,13 @@ public class GUIView {
         frame.setVisible(true);
     }
 
+    public void resizeGrid(int x, int y) {
+        grid.translate(x, y);
+        grid.resizeBufferedImage();
+    }
+
     public void repaintGrid() {
+        grid.buildBufferedImage();
         grid.repaint();
     }
 }

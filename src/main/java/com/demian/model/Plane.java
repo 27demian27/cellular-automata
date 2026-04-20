@@ -10,6 +10,9 @@ import java.util.stream.IntStream;
 
 public class Plane {
 
+    private final RuleEnforcer ruleEnforcer;
+    private final Random randomizer;
+
     private Cell[][] cells;
 
     @Getter
@@ -19,10 +22,6 @@ public class Plane {
     private int sizeX;
     @Getter
     private int sizeY;
-
-    RuleEnforcer ruleEnforcer;
-
-    Random randomizer;
 
     public Plane() {
         ruleEnforcer = new RuleEnforcer(sizeX, sizeY);

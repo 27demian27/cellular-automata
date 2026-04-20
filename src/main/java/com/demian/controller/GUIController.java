@@ -72,6 +72,12 @@ public class GUIController {
                 menu.showErrorDialog(e);
             }
         });
+
+        menu.setOnResizeRequested(newBounds -> {
+            model.resize(newBounds.get("X1"), newBounds.get("X2"), newBounds.get("Y1"), newBounds.get("Y2"));
+            view.resizeGrid(newBounds.get("X1"), newBounds.get("Y1"));
+            view.repaintGrid();
+        });
     }
 
     public void nextGeneration() {
