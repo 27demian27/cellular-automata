@@ -1,6 +1,7 @@
 package com.demian.view;
 
 import com.demian.model.Plane;
+import com.demian.util.Bounds;
 import com.demian.view.painting.PaintMode;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +9,8 @@ import lombok.Setter;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.util.*;
 import java.util.function.BiConsumer;
 
@@ -26,6 +29,8 @@ public class Grid extends JPanel {
     private Point lastDragPoint;
     private Point lastGridPaintPoint;
 
+    @Getter
+    private Bounds viewBounds;
     private final Deque<Map<Point, Integer>> recentlyPaintedPoints;
     @Setter
     private PaintMode paintMode;
@@ -38,21 +43,27 @@ public class Grid extends JPanel {
     @Setter
     private Runnable onNextGenerationRequested;
 
-
     private DebugDrawer debugDrawer;
+
+    private BufferedImage buffer;
+
+    public final static int cellSize = 20;
+    public final static double minScaleForBorderDraw = 0.2;
 
     public Grid(Plane plane) {
         this.plane = plane;
-        this.scale = 1.0;
-        this.translateX = 0;
-        this.translateY = 0;
-        this.paintMode = PaintMode.NORMAL;
-        this.recentlyPaintedPoints = new LinkedList<>();
-        this.lastDragPoint = new Point(-1, -1);
-        this.lastGridPaintPoint = new Point(-1, -1);
-        this.showGridLines = true;
-        this.showDebug = false;
+        scale = 1.0;
+        translateX = 0;
+        translateY = 0;
+        paintMode = PaintMode.NORMAL;
+        recentlyPaintedPoints = new LinkedList<>();
+        lastDragPoint = new Point(-1, -1);
+        lastGridPaintPoint = new Point(-1, -1);
+        showGridLines = true;
+        showDebug = false;
+    }
 
+    public void configure() {
         setBackground(Color.DARK_GRAY);
         setLayout(new OverlayLayout(this));
         configureDebugDrawer();
@@ -223,13 +234,17 @@ public class Grid extends JPanel {
         super.paintComponent(g);
         if (plane == null) return;
 
+        if (buffer == null) {
+            buffer = new BufferedImage(plane.getSizeX()*cellSize, plane.getSizeY()*cellSize, BufferedImage.TYPE_BYTE_GRAY);
+            buildBufferedImage();
+        }
+
         Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+
         g2.translate(translateX, translateY);
         g2.scale(scale, scale);
+        g2.drawImage(buffer, 0, 0, null);
 
-        int cellSize = 20;
-        double minScaleForBorderDraw = 0.2;
 
         Rectangle clip = g2.getClipBounds();
         int startX = Math.max(0, clip.x / cellSize);
@@ -237,24 +252,46 @@ public class Grid extends JPanel {
         int startY = Math.max(0, clip.y / cellSize);
         int endY   = Math.min(plane.getSizeY(), (clip.y + clip.height) / cellSize + 1);
 
+        viewBounds = new Bounds(startX, endX, startY, endY);
+
+        if (showGridLines && scale > minScaleForBorderDraw) {
+            g2.setColor(Color.BLACK);
+
+            for (int x = startX; x < endX; x++) {
+                for (int y = startY; y < endY; y++) {
+                    g2.drawRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
+            }
+        }
+    }
+
+    public void resizeBufferedImage() {
+        buffer = new BufferedImage(plane.getSizeX()*cellSize, plane.getSizeY()*cellSize, BufferedImage.TYPE_BYTE_GRAY);
+        buildBufferedImage();
+    }
+
+    public void buildBufferedImage() {
+        Graphics2D g2 = buffer.createGraphics();
+
+        g2.setRenderingHint(
+                RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BILINEAR
+        );
+
         g2.setColor(Color.WHITE);
         g2.fillRect(0, 0, plane.getSizeX() * cellSize, plane.getSizeY() * cellSize);
 
-        for (int x = startX; x < endX; x++) {
-            for (int y = startY; y < endY; y++) {
+        for (int x = 0; x < plane.getSizeX(); x++) {
+            for (int y = 0; y < plane.getSizeY(); y++) {
                 int state = plane.getState(x, y).orElse(0);
                 if (state == 1) {
                     g2.setColor(Color.BLACK);
                     g2.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
                 }
-                if (showGridLines && scale > minScaleForBorderDraw) {
-                    g2.setColor(Color.BLACK);
-                    g2.drawRect(x * cellSize, y * cellSize, cellSize, cellSize);
-                }
             }
         }
-
         g2.dispose();
+
     }
 
     public void undoRecentPaint() {

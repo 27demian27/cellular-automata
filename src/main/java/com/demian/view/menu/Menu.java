@@ -2,6 +2,7 @@ package com.demian.view.menu;
 
 import com.demian.model.Plane;
 import com.demian.model.RuleSet;
+import com.demian.util.Bounds;
 import com.demian.view.Grid;
 import com.demian.view.painting.PaintMode;
 import lombok.Setter;
@@ -14,6 +15,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -28,7 +30,6 @@ public class Menu extends JMenuBar {
     @Setter
     private Runnable onStateSaveRequested;
 
-
     @Setter
     private Consumer<RuleSet> onAlternatingRulesetAdded;
     @Setter
@@ -39,6 +40,8 @@ public class Menu extends JMenuBar {
     private BiConsumer<List<Integer>, List<Integer>> onCustomRulesetChanged;
     @Setter
     private Consumer<String> onStateLoadRequested;
+    @Setter
+    private Consumer<Bounds> onResizeRequested;
 
     private final Frame frame;
     private final Plane plane;
@@ -216,10 +219,8 @@ public class Menu extends JMenuBar {
                 int y1 = dialog.getY1();
                 int y2 = dialog.getY2();
 
-                // Moet via controller
-                plane.resize(x1, x2, y1, y2);
-                grid.translate(x1, y1);
-                grid.repaint();
+                if (onResizeRequested != null)
+                    onResizeRequested.accept(new Bounds(x1, x2, y1, y2));
             }
         });
         return resizeGridItem;

@@ -1,9 +1,11 @@
 package com.demian.view;
 
+import com.demian.util.Bounds;
 import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Map;
 
 public class DebugDrawer extends JComponent {
 
