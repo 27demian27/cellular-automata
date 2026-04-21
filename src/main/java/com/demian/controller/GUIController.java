@@ -75,6 +75,8 @@ public class GUIController {
         menu.setOnStateLoadRequested(name -> {
             try {
                 saveController.loadState(name);
+                view.resizeGrid(model.getSizeX(), model.getSizeY());
+                view.repaintGrid();
             } catch (IOException e) {
                 menu.showErrorDialog(e);
             }
