@@ -142,7 +142,7 @@ public class Plane {
     }
 
     public void simulateGeneration() {
-
+        long start = System.nanoTime();
         ruleEnforcer.changeAlternation();
 
         for (Cell[] row : cells) {
@@ -159,6 +159,10 @@ public class Plane {
         }
 
         recountAliveCells();
+
+        long elapsed = System.nanoTime() - start;
+        System.out.printf("Simulating generation took \n%.4f ms\n", elapsed / 1_000_000.0);
+
     }
 
     public void simulateGenerationThreaded() {

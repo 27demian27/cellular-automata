@@ -12,6 +12,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
 public class Grid extends JPanel {
@@ -47,6 +48,8 @@ public class Grid extends JPanel {
 
     private BufferedImage buffer;
 
+    private final AtomicBoolean isBuildingImage;
+
     public final static int cellSize = 20;
     public final static double minScaleForBorderDraw = 0.2;
 
@@ -61,6 +64,7 @@ public class Grid extends JPanel {
         lastGridPaintPoint = new Point(-1, -1);
         showGridLines = true;
         showDebug = false;
+        isBuildingImage = new AtomicBoolean(false);
     }
 
     public void configure() {
@@ -169,8 +173,25 @@ public class Grid extends JPanel {
         getActionMap().put("nextGen", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (onNextGenerationRequested != null)
-                    onNextGenerationRequested.run();
+                if (onNextGenerationRequested == null) return;
+                if (!isBuildingImage.compareAndSet(false, true)) return;
+
+                new SwingWorker<Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        onNextGenerationRequested.run();
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        isBuildingImage.set(false);
+                    }
+
+                }.execute();
+
+
             }
         });
         getActionMap().put("undo", new AbstractAction() {
@@ -271,6 +292,7 @@ public class Grid extends JPanel {
     }
 
     public void buildBufferedImage() {
+        long start = System.nanoTime();
         Graphics2D g2 = buffer.createGraphics();
 
         g2.setRenderingHint(
@@ -292,6 +314,8 @@ public class Grid extends JPanel {
         }
         g2.dispose();
 
+        long elapsed = System.nanoTime() - start;
+        System.out.printf("Building buffered image took \n%.4f ms\n", elapsed / 1_000_000.0);
     }
 
     public void undoRecentPaint() {
