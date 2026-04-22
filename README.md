@@ -19,6 +19,10 @@ Features include:
 - Saving and Loading of Grid state
 
 ### How to run
+#### Prerequisites
+Java 21 & Maven 
+
+#### Compile & Run
 ``mvn compile`` \
 ``mvn exec:java``
 
